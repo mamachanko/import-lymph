@@ -1,0 +1,22 @@
+name: lep
+root: ~/lymph-europython
+
+windows:
+    - lymph-europython:
+        layout: main-vertical
+        panes:
+            - client:
+                - . venv/bin/activate
+                - export PYTHONPATH=.
+            - echo:
+                - . venv/bin/activate
+                - export PYTHONPATH=.
+                - lymph instance --config=.lymph.yml --interface=echo:Echo
+            - web:
+                - . venv/bin/activate
+                - export PYTHONPATH=.
+                - lymph instance --config=.lymph.yml --interface=web:Web
+            - listener:
+                - . venv/bin/activate
+                - export PYTHONPATH=.
+                - lymph instance --config=.lymph.yml --interface=listener:Listener
