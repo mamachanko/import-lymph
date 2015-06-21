@@ -9,7 +9,18 @@ Castillo / Max and I'd like to introduce you to _lymph_, a framework for
 writing services in Python. With lymph you can write services with almost no
 boilerplate. But let me introduce us first.
 
-We're Delivery Hero...
+We're Delivery Hero, a holding of online food ordering service world-wide.
+We're located in Berlin.  We operate in 34 countries and growing. Let me
+explain the concept of online food ordering to those who're unfamiliar with it.
+However, I doubt there arent any ;) The concept it's simple: get hungry, go
+online, search for restaurants close to you, compile your order, pay online,
+wait for the delivery. Basically, it's e-commerce with very grumpy customers.
+But the restaurant integration, e.g. order transmission, fulfillment, delivery,
+etc. offer quite an ecosystem of things to tackle.
+
+For the sake of this talk we assume that you're familiar with the concept of
+services. We will not discuss the differences between monoliths and services
+and the individual leverages and drawbacks. 
 
 ### Introduction
 * Hello
@@ -58,7 +69,9 @@ We're Delivery Hero...
 * distconfig
 
 ### summary and outro
-* lymph.io, we accept PRs
+* lymph.io
+* we accept PRs
+* we're hiring
 
 ### QA
  
