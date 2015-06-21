@@ -1,22 +1,19 @@
-name: lep
-root: ~/lymph-europython
+name: all
+root: ~/lymph-talk
+pre_window: . venv/bin/activate && export PYTHONPATH=.
 
 windows:
-    - lymph-europython:
+    - lymph:
         layout: main-vertical
         panes:
             - client:
-                - . venv/bin/activate
-                - export PYTHONPATH=.
-            - echo:
-                - . venv/bin/activate
-                - export PYTHONPATH=.
-                - lymph instance --config=.lymph.yml --interface=echo:Echo
+                - figlet client
             - web:
-                - . venv/bin/activate
-                - export PYTHONPATH=.
+                - figlet web
                 - lymph instance --config=.lymph.yml --interface=web:Web
+            - echo:
+                - figlet echo
+                - lymph instance --config=.lymph.yml --interface=echo:Echo
             - listener:
-                - . venv/bin/activate
-                - export PYTHONPATH=.
+                - figlet listener
                 - lymph instance --config=.lymph.yml --interface=listener:Listener
