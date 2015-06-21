@@ -23,5 +23,5 @@ instances:
     web:
         command: lymph instance --config=web.yml --loglevel=info --reload
 
-    listener:
+    ear:
         command: lymph instance --config=listener.yml --loglevel=info --reload

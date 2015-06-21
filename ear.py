@@ -1,7 +1,7 @@
 import lymph
 
 
-class Listener(lymph.Interface):
+class Ear(lymph.Interface):
 
     @lymph.event('echo')
     def on_echo(self, event):

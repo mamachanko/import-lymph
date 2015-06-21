@@ -15,6 +15,6 @@ windows:
             - echo:
                 - figlet echo
                 - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info
-            - listener:
-                - figlet listener
-                - lymph instance --config=.lymph.yml --interface=listener:Listener --loglevel=info
+            - ear:
+                - figlet ear
+                - lymph instance --config=.lymph.yml --interface=ear:Ear --loglevel=info
