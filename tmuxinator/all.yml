@@ -8,12 +8,13 @@ windows:
         panes:
             - client:
                 - figlet client
+                - http POST localhost:4080/echo text=hi
             - web:
                 - figlet web
-                - lymph instance --config=.lymph.yml --interface=web:Web
+                - lymph instance --config=.lymph.yml --interface=web:Web --loglevel=info
             - echo:
                 - figlet echo
-                - lymph instance --config=.lymph.yml --interface=echo:Echo
+                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info
             - listener:
                 - figlet listener
-                - lymph instance --config=.lymph.yml --interface=listener:Listener
+                - lymph instance --config=.lymph.yml --interface=listener:Listener --loglevel=info

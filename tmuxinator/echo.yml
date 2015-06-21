@@ -1,0 +1,13 @@
+name: echo
+root: ~/lymph-talk
+pre_window: . venv/bin/activate && export PYTHONPATH=.
+
+windows:
+    - lymph:
+        layout: main-vertical
+        panes:
+            - client:
+                - figlet client
+            - echo:
+                - figlet echo
+                - lymph instance --config=.lymph.yml --interface=echo:Echo
