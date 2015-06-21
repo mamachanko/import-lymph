@@ -65,5 +65,39 @@ We're Delivery Hero...
 ### nice-to-have
 * plugins (lymph-top, newrelic, sentry)
 * monitoring
-* serial_events & broadcast(websockets)
+* serial events & broadcast(websockets)
 
+# Setup
+
+create virtualenv:
+```
+virtualenv venv
+. venv/bin/activate
+pip install -r requirements.txt
+```
+
+install tmuxinator:
+```
+brew install tmuxinator
+```
+
+make sure `$EDITOR` is set:
+```
+mux doctor
+```
+
+link tmuxinator projects:
+```
+ln -s `pwd`/tmuxinator/* ~/.tmuxinator
+```
+
+remove zookeeper node `/lymph`:
+```
+zkCli.sh
+rmr /lymph
+```
+
+make sure zk and rabbitmq are running. start tmuxinator project:
+```
+mux start all
+```
