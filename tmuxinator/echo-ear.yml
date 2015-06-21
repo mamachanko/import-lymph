@@ -1,0 +1,20 @@
+name: all
+root: ~/lymph-talk
+pre_window: . venv/bin/activate && export PYTHONPATH=.
+
+windows:
+    - lymph:
+        layout: main-vertical
+        panes:
+            - client:
+                - figlet client
+                - "lymph request Echo.echo '{\"text\": \"Good afternoon, EuroPython!\"}'"
+            - echo:
+                - figlet echo1
+                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info
+            - echo:
+                - figlet echo2
+                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info
+            - ear:
+                - figlet ear
+                - lymph instance --config=.lymph.yml --interface=ear:Ear --loglevel=info
