@@ -16,8 +16,9 @@ class Web(WebServiceInterface):
     def echo(self, request):
         post_data = json.loads(request.get_data())
         text = post_data['text']
+        echoed = self.proxy('Echo').echo(text=text)
         return Response(
-            json.dumps({'text': text}),
+            json.dumps({'echoed': echoed}),
             content_type='application/json'
         )
 
