@@ -11,10 +11,10 @@ windows:
                 - http POST localhost:4080/echo text=hi
             - web:
                 - figlet web
-                - lymph instance --config=.lymph.yml --interface=web:Web --loglevel=info
+                - lymph instance --config=.lymph.yml --interface=web:Web --loglevel=info --reload
             - echo:
                 - figlet echo
-                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info
+                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info --reload
             - ear:
                 - figlet ear
-                - lymph instance --config=.lymph.yml --interface=ear:Ear --loglevel=info
+                - lymph instance --config=.lymph.yml --interface=ear:Ear --loglevel=info --reload
