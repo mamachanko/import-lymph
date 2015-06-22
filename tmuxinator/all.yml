@@ -1,6 +1,6 @@
 name: all
 root: ~/lymph-talk
-pre_window: . venv/bin/activate && export PYTHONPATH=.
+pre_window: . venv/bin/activate && export PYTHONPATH=. && export PROMPT='» ' && clear
 
 windows:
     - lymph:
