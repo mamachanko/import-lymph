@@ -20,7 +20,29 @@ etc. offer quite an ecosystem of things to tackle.
 
 For the sake of this talk we assume that you're familiar with the concept of
 services. We will not discuss the differences between monoliths and services
-and the individual leverages and drawbacks. 
+and the individual leverages and drawbacks. By the way, how many of you have
+attended the nice talk about the 'nameko' framework?
+
+So, the first thing some of you would be thinking is 'why build a framework?'.
+The answer was that when we looked around we did not find anything that would
+fit our neccesities. We wanted to work with services but we wanted some very
+specific things. We are mainly python powered so we wanted to stay inside
+python as much as possible. We wanted to abstract away all the problems one has
+to consider when dealing with service (transporting data, registering services,
+discovering them), we wanted to enable our developer to work with services in a
+simple and easy way, no boilerplate, no excessive details that don't relate to
+bussiness logic. Yes, some of you will be thinking after their nice talk 'use
+Nameko'. But that was not in the current state when we started and anyway it
+does not cover all the things we wanted to get from our framework.
+
+So, say hello to lymph. By now you must be itching to see how a service looks
+in lymph. Spoiler alert, very much like in nameko.
+
+[Show simple echo service]
+
+One of the first things we considered when building lymph was the tooling. We
+think we managed to get some very nice tooling built around it to make
+development of services easier.
 
 ### Introduction
 * Hello
