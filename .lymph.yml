@@ -17,11 +17,11 @@ event_system:
 
 
 instances:
-    echo:
-        command: lymph instance --config=echo.yml --loglevel=info --reload
-
     web:
-        command: lymph instance --config=web.yml --loglevel=info --reload
+        command: lymph instance --config=conf/web.yml --loglevel=info --reload
+
+    echo:
+        command: lymph instance --config=conf/echo.yml --loglevel=info --reload
 
     ear:
-        command: lymph instance --config=listener.yml --loglevel=info --reload
+        command: lymph instance --config=conf/ear.yml --loglevel=info --reload

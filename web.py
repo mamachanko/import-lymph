@@ -7,11 +7,6 @@ from werkzeug.wrappers import Response
 
 class Web(WebServiceInterface):
 
-    # can be removed after merge of:
-    # https://github.com/deliveryhero/lymph/pull/208
-    http_port = 4080
-    pool_size = 2
-
     url_map = Map([
         Rule('/echo', endpoint='echo'),
     ])

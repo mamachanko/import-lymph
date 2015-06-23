@@ -10,4 +10,4 @@ windows:
                 - figlet client
             - echo:
                 - figlet echo
-                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info --reload
+                - lymph instance --config=conf/echo.yml --loglevel=info --reload

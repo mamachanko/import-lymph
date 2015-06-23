@@ -11,10 +11,10 @@ windows:
                 - "lymph request Echo.echo '{\"text\": \"Good afternoon, EuroPython!\"}'"
             - echo:
                 - figlet echo1
-                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info --reload
+                - lymph instance --config=conf/echo.yml --loglevel=info --reload
             - echo:
                 - figlet echo2
-                - lymph instance --config=.lymph.yml --interface=echo:Echo --loglevel=info --reload
+                - lymph instance --config=conf/echo.yml --loglevel=info --reload
             - ear:
                 - figlet ear
-                - lymph instance --config=.lymph.yml --interface=ear:Ear --loglevel=info --reload
+                - lymph instance --config=conf/ear.yml --loglevel=info --reload

@@ -1,3 +1,0 @@
-interfaces:
-    listener:
-        class: listener:Listener
