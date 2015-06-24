@@ -7,13 +7,13 @@ windows:
         layout: main-vertical
         panes:
             - client:
-                - figlet client
+                - toilet client
             - web:
-                - figlet web
+                - toilet web
                 - lymph instance --config=conf/web.yml --reload
             - echo:
-                - figlet echo
+                - toilet echo
                 - lymph instance --config=conf/echo.yml --reload
             - ear:
-                - figlet ear
+                - toilet ear
                 - lymph instance --config=conf/ear.yml --reload
