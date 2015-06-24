@@ -7,7 +7,7 @@ windows:
         layout: main-vertical
         panes:
             - client:
-                - figlet client
+                - toilet client
             - echo:
-                - figlet echo
-                - lymph instance --config=conf/echo.yml --loglevel=info --reload
+                - toilet echo
+                - lymph instance --config=conf/echo.yml --reload

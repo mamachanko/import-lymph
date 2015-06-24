@@ -12,11 +12,10 @@ class Web(WebServiceInterface):
     ])
 
     def echo(self, request):
-        post_data = json.loads(request.get_data())
-        text = post_data['text']
+        text = json.loads(request.get_data())['text']
         echoed = self.proxy('Echo').echo(text=text)
+        print 'http echo:', text
         return Response(
-            json.dumps({'echoed': echoed}),
-            content_type='application/json'
+            json.dumps({'text': echoed}), content_type='application/json'
         )
 

@@ -7,14 +7,13 @@ windows:
         layout: main-vertical
         panes:
             - client:
-                - figlet client
-                - "lymph request Echo.echo '{\"text\": \"Good afternoon, EuroPython!\"}'"
+                - toilet client
             - echo:
-                - figlet echo1
-                - lymph instance --config=conf/echo.yml --loglevel=info --reload
+                - toilet echo1
+                - lymph instance --config=conf/echo.yml --reload
             - echo:
-                - figlet echo2
-                - lymph instance --config=conf/echo.yml --loglevel=info --reload
+                - toilet echo2
+                - lymph instance --config=conf/echo.yml --reload
             - ear:
-                - figlet ear
-                - lymph instance --config=conf/ear.yml --loglevel=info --reload
+                - toilet ear
+                - lymph instance --config=conf/ear.yml --reload
