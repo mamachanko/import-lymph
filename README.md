@@ -34,7 +34,10 @@ By the way, how many of you have attended the nice talk about
 [nameko][https://github.com/onefinestay/nameko]?
 
 Our starting point was the classic situation. We had a massive Django monolith.
-Developers.
+We weren't moving fast at all. We've had trouble finding rhythm for a growing
+number of teams and developers. The perks of a more service-oriented became
+increasingly attractive and reasonable to us. This was even more so in the
+light of a global platform to unite our very heterogenix Product landscape.
 
 So, the first thing some of you would be thinking is 'why write another
 framework?'. The answer was that when we looked around we did not find
@@ -49,12 +52,13 @@ boilerplate, no excessive details that don't relate to bussiness logic.
 @TODO: prepare other alternatives and related technologies and possible go over
 them (jsonrpc, zerorpc, chaussette, cocaine, ...)
 
-Yes, some of you will be thinking after their nice talk 'use Nameko'. But that was
-not in the current state when we started. It also does not cover all the
-things we wanted to get from a framework.
+Yes, some of you will be thinking after their nice talk 'use Nameko'. But that
+was not in the current state when we started. It also does not cover all the
+things we wanted to get from a framework. Nevermind though, we'll briefly go
+over the differences of the two later.
 
-So, say hello to [lymph][lymph.io]. By now, hopefully, you must be itching to
-see how a service looks in lymph. Spoiler alert, very much like in nameko.
+So, say hello to [lymph][lymph.io]. By now, hopefully, you're itching to
+see how a service looks in lymph. Spoiler alert: very much like in nameko.
 
 [Show simple echo service]
 
