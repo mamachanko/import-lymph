@@ -18,6 +18,14 @@ wait for the delivery. Basically, it's e-commerce with very grumpy customers.
 But the restaurant integration, e.g. order transmission, fulfillment, delivery,
 etc. offer quite an ecosystem of things to tackle.
 
+Let's briefly go over the flow of our talk:
+* We're going to explain where we're coming from and why we have given birth to another framework
+* We'll look at code as fast possible
+* We'll run services and increasingly add new services to explore communication patterns and characteristics of lymph
+* We'll give you a brief rundown of lymph's internal
+* We'll go over how lymph is different from nameko
+* We'll talk future plans
+
 For the sake of this talk we assume that you're familiar with the concept of
 services. We will not discuss the differences between monoliths and services.
 We assume you are familiar their characteristics.
