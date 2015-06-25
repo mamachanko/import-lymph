@@ -5,12 +5,12 @@
 > A talk for EuroPython 2015 by Alejandro Castillo & Max Brauer
 
 Hello and good afternoon. Hopefully you've had a nice lunch. My name is
-Castillo / Max and I'd like to introduce you to _lymph_, a framework for
+<name> and I'd like to introduce you to _lymph_, a framework for
 writing services in Python. With lymph you can write services with almost no
 boilerplate. But let me introduce us first.
 
-We're Delivery Hero, a holding of online food ordering service world-wide.
-We're located in Berlin.  We operate in 34 countries and growing. Let me
+We're Delivery Hero, a holding of online food ordering services world-wide.
+We're located in Berlin. We operate in 34 countries and growing. Let me
 explain the concept of online food ordering to those who're unfamiliar with it.
 However, I doubt there arent any ;) The concept it's simple: get hungry, go
 online, search for restaurants close to you, compile your order, pay online,
@@ -19,24 +19,34 @@ But the restaurant integration, e.g. order transmission, fulfillment, delivery,
 etc. offer quite an ecosystem of things to tackle.
 
 For the sake of this talk we assume that you're familiar with the concept of
-services. We will not discuss the differences between monoliths and services
-and the individual leverages and drawbacks. By the way, how many of you have
-attended the nice talk about the 'nameko' framework?
+services. We will not discuss the differences between monoliths and services.
+We assume you are familiar their characteristics.
 
-So, the first thing some of you would be thinking is 'why build a framework?'.
-The answer was that when we looked around we did not find anything that would
-fit our neccesities. We wanted to work with services but we wanted some very
-specific things. We are mainly python powered so we wanted to stay inside
-python as much as possible. We wanted to abstract away all the problems one has
-to consider when dealing with service (transporting data, registering services,
-discovering them), we wanted to enable our developer to work with services in a
-simple and easy way, no boilerplate, no excessive details that don't relate to
-bussiness logic. Yes, some of you will be thinking after their nice talk 'use
-Nameko'. But that was not in the current state when we started and anyway it
-does not cover all the things we wanted to get from our framework.
+By the way, how many of you have attended the nice talk about
+[nameko][https://github.com/onefinestay/nameko]?
 
-So, say hello to lymph. By now you must be itching to see how a service looks
-in lymph. Spoiler alert, very much like in nameko.
+Our starting point was the classic situation. We had a massive Django monolith.
+Developers.
+
+So, the first thing some of you would be thinking is 'why write another
+framework?'. The answer was that when we looked around we did not find
+anything that would fit our needs. We wanted to work with services but we
+wanted some very specific things(@TODO what are these?). We are mainly
+Python-powered so we wanted to stay inside Python as much as possible. We
+wanted to abstract away all the problems one is dealing with when doind
+services, i.e. transport data, register services, discover them etc. We wanted
+to enable our developers to work with services in a simple and easy way: no
+boilerplate, no excessive details that don't relate to bussiness logic.
+
+@TODO: prepare other alternatives and related technologies and possible go over
+them (jsonrpc, zerorpc, chaussette, cocaine, ...)
+
+Yes, some of you will be thinking after their nice talk 'use Nameko'. But that was
+not in the current state when we started. It also does not cover all the
+things we wanted to get from a framework.
+
+So, say hello to [lymph][lymph.io]. By now, hopefully, you must be itching to
+see how a service looks in lymph. Spoiler alert, very much like in nameko.
 
 [Show simple echo service]
 
