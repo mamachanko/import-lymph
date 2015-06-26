@@ -1,0 +1,13 @@
+name: all
+root: ~/lymph-talk
+pre_window: . venv/bin/activate && source env && clear
+
+windows:
+    - lymph:
+        layout: main-vertical
+        panes:
+            - client:
+                - toilet client
+            - node:
+                - toilet node
+                - lymph node
