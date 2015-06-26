@@ -37,7 +37,7 @@ Our starting point was the classic situation. We had a massive Django monolith.
 We weren't moving fast at all. We've had trouble finding rhythm for a growing
 number of teams and developers. The perks of a more service-oriented became
 increasingly attractive and reasonable to us. This was even more so in the
-light of a global platform to unite our very heterogenix Product landscape.
+light of a global platform to unite our very heterogenic Product landscape.
 
 So, the first thing some of you would be thinking is 'why write another
 framework?'. The answer was that when we looked around we did not find
@@ -60,11 +60,51 @@ over the differences of the two later.
 So, say hello to [lymph][lymph.io]. By now, hopefully, you're itching to
 see how a service looks in lymph. Spoiler alert: very much like in nameko.
 
+We'll break the ice by demoing running and playing around with services. We'll
+slowly progress through lymph's features, service by service.
+
 [Show simple echo service]
+
+## Demo
+
+Et voila. This is what a simple echo service looks like in lymph. Its interface
+is one RPC method called `echo` which takes text, returns it and emits and
+event before.
+
+All we need to do is to inherit from `lymph.Interface` and decorate RPC methods
+with `@lymph.rpc()`. Lastly, we've got the interface's `emit()` function to our
+disposal which dispatches events in the event system.
+
+Let's jump on the shell and play with it.
+
+``` shell
+mux start echo
+```
+
+What you see here is a tmux session with two panes. On the right-hand side you
+see the echo service being run with lymph's `instance` command. On the
+left-hand side you see a plain shell on which we'll explore lymph's tooling.
 
 One of the first things we considered when building lymph was the tooling. We
 think we managed to get some very nice tooling built around it to make
 development of services easier.
+
+So what tooling is available? `lymph list` will tell us.
+
+``` shell
+lymph list
+```
+
+You see there's plenty of commands available to interact with services.
+
+To begin with let's assert that an instance of the echo service is running.
+We'll use lymph's `discover` command.
+
+``` shell
+lymph discover
+```
+
+As you can see, one instance is running indeed (`Echo [1]`).
 
 ### Introduction
 * Hello
