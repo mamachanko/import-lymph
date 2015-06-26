@@ -63,17 +63,17 @@ see how a service looks in lymph. Spoiler alert: very much like in nameko.
 We'll break the ice by demoing running and playing around with services. We'll
 slowly progress through lymph's features, service by service.
 
-[Show simple echo service]
+[Show echo service]
 
 ## Demo
 
 Et voila. This is what a simple echo service looks like in lymph. Its interface
-is one RPC method called `echo` which takes text, returns it and emits and
-event before.
+is one RPC method called `echo` which takes text, prints it, emits an
+event(containing the text in the body) and returns the text.
 
-All we need to do is to inherit from `lymph.Interface` and decorate RPC methods
-with `@lymph.rpc()`. Lastly, we've got the interface's `emit()` function to our
-disposal which dispatches events in the event system.
+All we need to do to make things happen is to inherit from `lymph.Interface`
+and decorate RPC methods with `@lymph.rpc()`. Lastly, we've got the interface's
+`emit()` function to our disposal which dispatches events in the event system.
 
 Let's jump on the shell and play with it.
 
@@ -105,6 +105,65 @@ lymph discover
 ```
 
 As you can see, one instance is running indeed (`Echo [1]`).
+
+Let's excercise the echo service's `echo` method. We'll use lymph's `request`
+command. Therefore, we have to provide the service name, the name of the method
+and the body of the request as JSON. What we expect to see is the echo service
+to return the text as is, but it should also print it and emit an event.
+
+@TODO: think of a way to display `lymph emit` that is not confusing and doesn't harm flow.
+
+``` shell
+lymph request Echo.echo '{"text": "Good afternoon, EuroPython!"}'
+```
+
+The result of the RPC is as expected and the service printed the text.
+
+This is boring and our service must be pretty lonely. Nobody listens to its
+events. Here comes the ear.
+
+[Show ear service]
+
+The ear listens to echo's events. Pardon the pun. Again, it's a lymph
+service(we inherit from `lymph.Interface`). However, there's nothing but one
+method which is subscribed to `echo` events. It simply prints the text contained
+in the event's body. That means, everytime an event of this type occurs
+exactly once instance of ear will consume it.
+
+Let's excercise our services combination. This time round, though, we'll run
+two instances of the echo service and one instance of the ear service.
+
+``` shell
+mux start echo-ear
+```
+
+Again, we a tmux session. On the right you find two instances of the echo
+service followed by an instance of the ear service.
+
+We should find them registered correctly.
+
+``` shell
+lymph discover
+```
+
+And, indeed, they list correctly.
+
+When we do RPCs now we expect the echo instances to respond in round-robin
+fashion. Furthermore, the ear instance should print all consumed events.
+
+``` shell
+lymph request Echo.echo '{"text": "Good afternoon, EuroPython!"}'
+```
+(repeatedly, until both echo instances have responded)
+
+As you see, our expectations are met.
+
+If we were to run several instances of the ear services, each event would be
+consumed by exactly once instance. However, lymph allows to broadcast events.
+
+@TODO: consider running sev
+
+Finally, since it's 2015, let's add a web service ot the mix.
 
 ### Introduction
 * Hello
@@ -158,6 +217,7 @@ As you can see, one instance is running indeed (`Echo [1]`).
 * we're hiring
 
 ### QA
+* why zookeeper for registry?
  
 ### nice-to-have
 * plugins (lymph-top, newrelic, sentry)
