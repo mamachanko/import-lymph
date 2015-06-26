@@ -123,6 +123,7 @@ development of services easier.
 * plugins (lymph-top, newrelic, sentry)
 * monitoring
 * serial events & broadcast(websockets)
+* sieve of Erathostenes (Mislav)
 
 # Setup
 
