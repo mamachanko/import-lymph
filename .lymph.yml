@@ -22,6 +22,8 @@ instances:
 
     echo:
         command: lymph instance --config=conf/echo.yml --reload
+        numprocesses: 3
 
     ear:
         command: lymph instance --config=conf/ear.yml --reload
+        numprocesses: 2
