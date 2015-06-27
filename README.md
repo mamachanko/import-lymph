@@ -216,8 +216,9 @@ Finally, since it's 2015, let's add a web service ot the mix.
 * we accept PRs
 * we're hiring
 
-### QA
+### Q&A
 * why zookeeper for registry?
+* how to scale up web services? (sharing sockets)
  
 ### nice-to-have
 * plugins (lymph-top, newrelic, sentry)
