@@ -9,7 +9,10 @@ code ready for your perusal. To get it up and running:
 vagrant up && vagrant ssh
 ```
 
-The `motd` contains all information you need to play around.
+You will be prompted for the root password half-way through `vagrant up`
+because we use NTFS to share files.
+
+Once inside, the `motd` contains all information you need to play around.
 
 ## The talk
 > A talk for EuroPython 2015 by Alejandro Castillo & Max Brauer
