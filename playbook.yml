@@ -48,12 +48,17 @@
 
     - name: Tmuxinator is present
       gem: name=tmuxinator
-           state=latest
+           state=present
+           version=0.6.11
            user_install=yes
 
     - name: Tmuxinator appears in PATH  # this is bad. help me :(
       lineinfile: dest=~/.bashrc
                   line="export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin"
+
+    - name: Locale is set
+      lineinfile: dest=~/.bashrc
+                  line='export LC_ALL="en_US.UTF-8"'
 
     - name: Virtualenv is present
       become: yes
@@ -73,6 +78,22 @@
                   line="cd ~/lymph-talk"
 
     #TODO: maybe add: tmux.conf & vimrc
+
+    - name: Disable default motd
+      become: yes
+      file: name={{ item }}
+            mode=-x
+      with_fileglob:
+        - /etc/update-motd.d/*
+
+    - name: Custom motd is present
+      become: yes
+      copy: dest=/etc/motd
+            src=motd
+
+    - name: Tmux conf is present
+      copy: dest=~/.tmux.conf
+            src=tmux.conf
 
   handlers:
     - name: Restart zookeeper
