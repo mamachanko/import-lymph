@@ -2,8 +2,8 @@
 
 ## Setup
 
-It is suggest to use the provided vagrant box. It's setup with all tolling and
-code ready for your perusal. To get it up and running:
+It is suggest to use the provided vagrant box. It is set up with all tooling
+and code ready for your perusal. To get it up and running execute:
 
 ``` shell
 vagrant up && vagrant ssh
@@ -12,24 +12,32 @@ vagrant up && vagrant ssh
 You will be prompted for the root password half-way through `vagrant up`
 because we use NFS to share files.
 
-Once inside, the `motd` contains all information you need to play around.
+Once inside, the `motd` contains all information you need to get going.
 
 ## The talk
-> A talk for EuroPython 2015 by Alejandro Castillo & Max Brauer
+> An introduction talk about lymph by Alejandro Castillo & Max Brauer
+
+(This is a transcript. So it might read odd here and there.)
 
 Hello and good afternoon. Hopefully you've had a nice lunch. My name is
-<name> and I'd like to introduce you to _lymph_, a framework for
-writing services in Python. With lymph you can write services with almost no
+\<name\> and I'd like to introduce you to _lymph_, a framework for writing
+services in Python. With lymph you can write services with almost no
 boilerplate. But let me introduce us first.
 
 We're Delivery Hero, a holding of online food ordering services world-wide.
-We're located in Berlin. We operate in 34 countries and growing. Let me
-explain the concept of online food ordering to those who're unfamiliar with it.
-However, I doubt there arent any ;) The concept it's simple: get hungry, go
-online, search for restaurants close to you, compile your order, pay online,
-wait for the delivery. Basically, it's e-commerce with very grumpy customers.
-But the restaurant integration, e.g. order transmission, fulfillment, delivery,
-etc. offer quite an ecosystem of things to tackle.
+We're located in Berlin. We operate in 34 countries and growing.
+
+Let me explain the concept of online food ordering to those who're unfamiliar
+with it. However, I doubt there arent any ;) The concept is simple:
+* get hungry
+* go online
+* search for restaurants close to you
+* compile your order
+* pay online
+* wait for the delivery
+Basically, it's e-commerce with very grumpy customers. But the restaurant
+integration, e.g. order transmission, fulfillment, delivery, etc. offer quite
+an ecosystem of things to tackle.
 
 Let's briefly go over the flow of our talk:
 * We're going to explain where we're coming from and why we have given birth
@@ -42,17 +50,36 @@ Let's briefly go over the flow of our talk:
 * We'll talk future plans
 
 For the sake of this talk we assume that you're familiar with the concept of
-services. We will not discuss the differences between monoliths and services.
-We assume you are familiar their characteristics.
+services. We assume that you are familiar with what a monolith is. We assume
+that you are familiar with when and why to use either and even more so when
+not. We will not discuss the differences between monoliths and services. We
+won't talk about how services might safe your development or your business.
+Neither will talk about sophisticated networking topologies on how to plug
+services together.
 
-By the way, how many of you have attended the nice talk about
-[nameko][https://github.com/onefinestay/nameko]?
+But what we're going to talk about is lymph. By the end of the talk you should
+understand what lymph can and cannot do and why that's cool.
+
+You can find all sources and this talk written down online. I'll share it with
+you afterwards, otherwise my appearance here is pointless ^^
+
+If you're Spanish speaker you may also want to attend this very talk in Spanish
+later this weak by Castillo.
+
+If you happen to attend the PyCon France, we'll meet there too.
+
+You can find us in the foyer. Talk to us :) We've brought goodies and gummi
+bears.
+
+(repeat all this in the end)
 
 Our starting point was the classic situation. We had a massive Django monolith.
 We weren't moving fast at all. We've had trouble finding rhythm for a growing
-number of teams and developers. The perks of a more service-oriented became
-increasingly attractive and reasonable to us. This was even more so in the
-light of a global platform to unite our very heterogenic Product landscape.
+number of teams and developers. People we're blocked by other people. You
+should think textbook "my monolith hurts, i want services". So, the perks of a
+more service-oriented became increasingly attractive and reasonable to us. This
+was even more so in the light of a global platform to unite our very
+heterogenic Product landscape. #modularity
 
 So, the first thing some of you would be thinking is 'why write another
 framework?'. The answer was that when we looked around we did not find
@@ -66,6 +93,9 @@ boilerplate, no excessive details that don't relate to bussiness logic.
 
 @TODO: prepare other alternatives and related technologies and possible go over
 them (jsonrpc, zerorpc, chaussette, cocaine, ...)
+
+By the way, how many of you have attended the nice talk about
+[nameko](https://github.com/onefinestay/nameko)?
 
 Yes, some of you will be thinking after their nice talk 'use Nameko'. But that
 was not in the current state when we started. It also does not cover all the
