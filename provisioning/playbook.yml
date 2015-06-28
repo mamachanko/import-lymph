@@ -77,8 +77,6 @@
       lineinfile: dest=~/.bashrc
                   line="cd ~/lymph-talk"
 
-    #TODO: maybe add: tmux.conf & vimrc
-
     - name: Disable default motd
       become: yes
       file: name={{ item }}
