@@ -1,7 +1,23 @@
-(http://socrates.io/#xfL9riN)
-
 # Stop trying to glue your services together`; import lymph`
 
+## Setup
+
+A vagrant box is provided which contains the samples of the talk ready for your
+perusal. To get it up and running:
+
+``` shell
+vagrant up && vagrant ssh
+```
+
+Once inside, you can start any of the provided tmuxinator sessions to play
+around with lymph and services:
+
+``` shell
+mux list  # shows the available sessions
+mux start echo  # starts the echo service session
+```
+
+## The talk
 > A talk for EuroPython 2015 by Alejandro Castillo & Max Brauer
 
 Hello and good afternoon. Hopefully you've had a nice lunch. My name is
@@ -65,7 +81,7 @@ slowly progress through lymph's features, service by service.
 
 [Show echo service]
 
-## Demo
+### Demo
 
 Et voila. This is what a simple echo service looks like in lymph. Its interface
 is one RPC method called `echo` which takes text, prints it, emits an
@@ -165,6 +181,7 @@ consumed by exactly once instance. However, lymph allows to broadcast events.
 
 Finally, since it's 2015, let's add a web service ot the mix.
 
+## Flow notes
 ### Introduction
 * Hello
 * this is who we are
@@ -226,37 +243,3 @@ Finally, since it's 2015, let's add a web service ot the mix.
 * serial events & broadcast(websockets)
 * sieve of Erathostenes (Mislav)
 
-# Setup
-
-create virtualenv:
-```
-virtualenv venv
-. venv/bin/activate
-pip install -r requirements.txt
-```
-
-install tmuxinator:
-```
-brew install tmuxinator
-```
-
-make sure `$EDITOR` is set:
-```
-mux doctor
-```
-
-link tmuxinator projects:
-```
-ln -s `pwd`/tmuxinator/* ~/.tmuxinator
-```
-
-remove zookeeper node `/lymph`:
-```
-zkCli.sh
-rmr /lymph
-```
-
-make sure zk and rabbitmq are running. start tmuxinator project:
-```
-mux start all
-```
