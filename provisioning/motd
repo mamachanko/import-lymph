@@ -24,6 +24,10 @@ running. If in doubt, run:
 
   $ lymph list
 
+Middleware:
+  Zookeeper is running at zk:2181
+  Rabbitmq is running at rabbitmq:5672
+
 Find out more about lymph at: http://lymph.io
 Find more about this vm at: http://github.com/mamachano/lymph-talk
 

@@ -2,8 +2,9 @@
 
 ## Setup
 
-It is suggest to use the provided vagrant box. It is set up with all tooling
-and code ready for your perusal. To get it up and running execute:
+It is suggest to use the provided [vagrant](vagrantup.com) box. It is set up
+with all tooling and code ready for your perusal. It has both zookeeper and
+rabbitmq running inside. To get it up and running execute:
 
 ``` shell
 vagrant up && vagrant ssh
