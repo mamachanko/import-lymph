@@ -74,6 +74,18 @@
 
     #TODO: maybe add: tmux.conf & vimrc
 
+    - name: Disable default motd
+      become: yes
+      file: name={{ item }}
+            mode=-x
+      with_fileglob:
+        - /etc/update-motd.d/*
+
+    - name: Custom motd is present
+      become: yes
+      copy: dest=/etc/motd
+            src=motd
+
   handlers:
     - name: Restart zookeeper
       become: yes
