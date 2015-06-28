@@ -1,0 +1,19 @@
+:ab ipdb import ipdb; ipdb.set_trace()
+set autoindent
+set backspace=indent,eol,start
+set colorcolumn=80
+set expandtab
+set hlsearch
+set nobackup
+set nocompatible
+set noswapfile
+set nowritebackup
+set nu
+set scrolloff=3
+set shiftround 
+set shiftwidth=4
+set showmode
+set tabstop=4
+set wildmenu
+set wildmode=longest,list,full
+syntax on

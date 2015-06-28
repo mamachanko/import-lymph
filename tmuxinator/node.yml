@@ -11,3 +11,7 @@ windows:
             - node:
                 - toilet node
                 - lymph node
+            - tail:
+                - sleep 1
+                - toilet tail
+                - lymph tail Web Echo Ear

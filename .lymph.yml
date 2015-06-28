@@ -17,13 +17,14 @@ event_system:
 
 
 instances:
-    web:
-        command: lymph instance --config=conf/web.yml --reload
+    Web:
+        command: lymph instance --config=conf/web.yml
+        port: 4080
 
-    echo:
-        command: lymph instance --config=conf/echo.yml --reload
+    Echo:
+        command: lymph instance --config=conf/echo.yml
         numprocesses: 3
 
-    ear:
-        command: lymph instance --config=conf/ear.yml --reload
+    Ear:
+        command: lymph instance --config=conf/ear.yml
         numprocesses: 2

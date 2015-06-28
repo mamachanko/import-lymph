@@ -52,14 +52,6 @@
            version=0.6.11
            user_install=yes
 
-    - name: Tmuxinator appears in PATH  # this is bad. help me :(
-      lineinfile: dest=~/.bashrc
-                  line="export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin"
-
-    - name: Locale is set
-      lineinfile: dest=~/.bashrc
-                  line='export LC_ALL="en_US.UTF-8"'
-
     - name: Virtualenv is present
       become: yes
       pip: name=virtualenv
@@ -72,10 +64,6 @@
       pip: virtualenv={{ venv }}
            name={{ item }}
       with_lines: cat ../requirements.txt
-
-    - name: Move into ~/lymph-talk on ssh
-      lineinfile: dest=~/.bashrc
-                  line="cd ~/lymph-talk"
 
     - name: Collect default motd scripts
       shell: ls -1 /etc/update-motd.d/*
@@ -94,6 +82,19 @@
     - name: Tmux conf is present
       copy: dest=~/.tmux.conf
             src=tmux.conf
+
+    - name: Vimrc conf is present
+      copy: dest=~/.vimrc
+            src=vimrc
+
+    - name: Bashrc is equipped
+      lineinfile: dest=~/.bashrc
+                  line="{{ item }}"
+      with_items:
+        - 'export EDITOR=vim'
+        - 'export LC_ALL="en_US.UTF-8"'
+        - 'export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin' # this is bad. help me :(
+        - 'cd ~/lymph-talk'
 
   handlers:
     - name: Restart zookeeper
