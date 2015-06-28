@@ -2,20 +2,14 @@
 
 ## Setup
 
-A vagrant box is provided which contains the samples of the talk ready for your
-perusal. To get it up and running:
+It is suggest to use the provided vagrant box. It's setup with all tolling and
+code ready for your perusal. To get it up and running:
 
 ``` shell
 vagrant up && vagrant ssh
 ```
 
-Once inside, you can start any of the provided tmuxinator sessions to play
-around with lymph and services:
-
-``` shell
-mux list  # shows the available sessions
-mux start echo  # starts the echo service session
-```
+The `motd` contains all information you need to play around.
 
 ## The talk
 > A talk for EuroPython 2015 by Alejandro Castillo & Max Brauer
