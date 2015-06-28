@@ -10,7 +10,7 @@ vagrant up && vagrant ssh
 ```
 
 You will be prompted for the root password half-way through `vagrant up`
-because we use NTFS to share files.
+because we use NFS to share files.
 
 Once inside, the `motd` contains all information you need to play around.
 
@@ -32,9 +32,11 @@ But the restaurant integration, e.g. order transmission, fulfillment, delivery,
 etc. offer quite an ecosystem of things to tackle.
 
 Let's briefly go over the flow of our talk:
-* We're going to explain where we're coming from and why we have given birth to another framework
+* We're going to explain where we're coming from and why we have given birth
+  to another framework
 * We'll look at code as fast possible
-* We'll run services and increasingly add new services to explore communication patterns and characteristics of lymph
+* We'll run services and increasingly add new services to explore communication
+  patterns and characteristics of lymph
 * We'll give you a brief rundown of lymph's internal
 * We'll go over how lymph is different from nameko
 * We'll talk future plans
@@ -76,7 +78,7 @@ see how a service looks in lymph. Spoiler alert: very much like in nameko.
 We'll break the ice by demoing running and playing around with services. We'll
 slowly progress through lymph's features, service by service.
 
-[Show echo service]
+[show Echo service code]
 
 ### Demo
 
@@ -135,7 +137,7 @@ The result of the RPC is as expected and the service printed the text.
 This is boring and our service must be pretty lonely. Nobody listens to its
 events. Here comes the ear.
 
-[Show ear service]
+[show Ear service code]
 
 The ear listens to echo's events. Pardon the pun. Again, it's a lymph
 service(we inherit from `lymph.Interface`). However, there's nothing but one
@@ -150,7 +152,7 @@ two instances of the echo service and one instance of the ear service.
 mux start echo-ear
 ```
 
-Again, we a tmux session. On the right you find two instances of the echo
+Again, we see a tmux session. On the right you find two instances of the echo
 service followed by an instance of the ear service.
 
 We should find them registered correctly.
@@ -160,6 +162,16 @@ lymph discover
 ```
 
 And, indeed, they list correctly.
+
+Let's emit an echo event in the event system to assert whether the ear service
+listens to it. We'll use lymph's `emit` command. We're expecting the ear to
+print the text field from the event body.
+
+```
+lymph emit echo '{"text": "hi"}'
+```
+
+Nice. That worked.
 
 When we do RPCs now we expect the echo instances to respond in round-robin
 fashion. Furthermore, the ear instance should print all consumed events.
@@ -174,9 +186,111 @@ As you see, our expectations are met.
 If we were to run several instances of the ear services, each event would be
 consumed by exactly once instance. However, lymph allows to broadcast events.
 
-@TODO: consider running sev
+Finally, since it's 2015, let's add a web service to the mix. Let's say we
+wanted to expose the echo functionality via an HTTP API. Lymph has a class for
+that.
 
-Finally, since it's 2015, let's add a web service ot the mix.
+[show Web service code]
+
+This is the Web service. It subclasses lymph's `WebServiceInterface`. In this
+case we're not exposing RPC methods, emitting not listening to events. However,
+we configure a Werkzeug URL map as a class attribute. We've added one endpoint:
+`/echo` and a handler for it. The handler receives a Werkzeug reuqest object.
+
+The echo handler unpacks the body of the request. It calls the echo service
+via the `self.proxy` and returns the result in the response. And it prints.
+
+Mind, that we're not validating the request method nor anything else.
+
+Run it or it didn't happen. We'll bring up an instance of each of services now.
+
+``` shell
+mux start all
+```
+
+On the right you can see an instance of every service, Web, Echo and Ear.
+
+Once again, they should have registered correctly:
+
+``` shell
+lymph discover
+```
+
+Let's hit our web service and see how the request ripples through our service
+cluster. We should see all service print something. The web service is
+listening at the default port 4080. We're using `httpie` to excercise the
+request:
+
+```
+http localhost:4080/echo text=hi
+```
+
+The response looks good and all services have performed accordingly.
+
+Yet, when developing locally you seldomly would want to run all of your
+services within different shell or tmux panes. Lymph has its own development
+server which wraps around any number of services with any number of instances
+each. Therefore, we'll have to configure which services to run and how many
+instances of each in the `.lymph.yml`:
+
+``` yaml
+instances:
+    web:
+        command: lymph instance --config=conf/web.yml
+
+    echo:
+        command: lymph instance --config=conf/echo.yml
+        numprocesses: 3
+
+    ear:
+        command: lymph instance --config=conf/ear.yml
+        numprocesses: 2
+```
+
+Mind that in our case `command` specifies lymph instances but this could also
+be any other service you need, e.g. Redis.
+
+Let's run it.
+
+``` shell
+mux start all
+```
+
+Once more, we find ourselves inside a tmux session with lymph node running in
+the top-right pane. Below that you see lymph tail running which allows us to
+follow the logs of any number of services. But first, let's check how many instances
+are running:
+
+``` shell
+lymph discover
+```
+
+That's a good number. Once we feed a request into the cluster we should see print
+statements and logs appearing.
+
+``` shell
+http localhost:4080/echo text=hi
+```
+
+But there's a lot going on. You would find an even bigger mess the more
+services and instances you run and the more intricated your patterns of
+communication become. Sometimes you wonder "where did my request go?". Lymph
+helps you though with `trace\_id`s. Every request that appears in our cluster
+which doesn't have a trace_id assigned gets one. These trace_ids get fowarded
+via every RPC and event.
+
+So we should be able to corellate all actions in cluster to the one incoming
+HTTP request.
+
+[use iterms highlighting: Ctrl+f and type 'trace_id']
+
+And indeed we see the same trace_id across our service instances.
+
+And that mostly covers the tooling we have for lymph services. Let's talk about
+lymph's stack next.
+
+## Lymph
+...
 
 ## Flow notes
 ### Introduction
