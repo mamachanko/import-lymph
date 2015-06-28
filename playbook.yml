@@ -48,7 +48,8 @@
 
     - name: Tmuxinator is present
       gem: name=tmuxinator
-           state=latest
+           state=present
+           version=0.6.11
            user_install=yes
 
     - name: Tmuxinator appears in PATH  # this is bad. help me :(
