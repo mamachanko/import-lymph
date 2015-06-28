@@ -56,6 +56,10 @@
       lineinfile: dest=~/.bashrc
                   line="export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin"
 
+    - name: Locale is set
+      lineinfile: dest=~/.bashrc
+                  line='export LC_ALL="en_US.UTF-8"'
+
     - name: Virtualenv is present
       become: yes
       pip: name=virtualenv
