@@ -1,0 +1,81 @@
+---
+- hosts: all
+  vars:
+    basedir: ~/lymph-talk
+    venv: "{{ basedir }}/venv"
+
+  pre_tasks:
+    - name: Apt cache is updated if old
+      become: yes
+      become_user: root
+      apt: update_cache=yes cache_valid_time=3600
+
+  tasks:
+    - name: Packages are present
+      become: yes
+      apt: name={{ item }}
+           state=present
+      with_items:
+        - rabbitmq-server
+        - zookeeper
+        - zookeeperd
+        - toilet
+        - python-dev
+        - python-pip
+
+    - name: Hosts are present
+      become: yes
+      lineinfile: dest=/etc/hosts
+                  line="{{ item }}"
+      with_items:
+        - "127.0.0.1 zk"
+        - "127.0.0.1 rabbitmq"
+
+    - name: Tmuxinator dir is absent
+      file: path=/home/vagrant/.tmuxinator
+            state=absent
+
+    - name: Tmuxinator dir is present
+      file: path=/home/vagrant/.tmuxinator
+            state=directory
+            force=yes
+
+    - name: Tmuxinator sessions are present
+      file: src={{ basedir }}/tmuxinator
+            dest=~/.tmuxinator
+            state=link
+            force=yes
+
+    - name: Tmuxinator is present
+      gem: name=tmuxinator
+           state=latest
+           user_install=yes
+
+    - name: Tmuxinator appears in PATH  # this is bad. help me :(
+      lineinfile: dest=~/.bashrc
+                  line="export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin"
+
+    - name: Virtualenv is present
+      become: yes
+      pip: name=virtualenv
+           state=present
+
+    - name: Venv is present
+      command: virtualenv {{ venv }}
+ 
+    - name: Requirements are installed
+      pip: virtualenv={{ venv }}
+           name={{ item }}
+      with_lines: cat requirements.txt
+
+    - name: Move into ~/lymph-talk on ssh
+      lineinfile: dest=~/.bashrc
+                  line="cd ~/lymph-talk"
+
+    #TODO: maybe add: tmux.conf & vimrc
+
+  handlers:
+    - name: Restart zookeeper
+      become: yes
+      service: name=zookeeper
+               state=started
