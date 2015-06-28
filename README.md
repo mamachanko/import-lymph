@@ -371,6 +371,7 @@ lymph's stack next.
 * distconfig
 
 ### summary and outro
+* did we accomplish? circle back to claim and title
 * lymph.io
 * we accept PRs
 * we're hiring
