@@ -71,7 +71,7 @@
     - name: Requirements are installed
       pip: virtualenv={{ venv }}
            name={{ item }}
-      with_lines: cat requirements.txt
+      with_lines: cat ../requirements.txt
 
     - name: Move into ~/lymph-talk on ssh
       lineinfile: dest=~/.bashrc

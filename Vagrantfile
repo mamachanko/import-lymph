@@ -5,6 +5,6 @@ Vagrant.configure("2") do |config|
   # TODO: configure memory, cpus, et al.
 
   config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "playbook.yml"
+    ansible.playbook = "provisioning/playbook.yml"
   end
 end
