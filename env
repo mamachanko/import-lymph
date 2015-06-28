@@ -1,3 +1,4 @@
 export PYTHONPATH=services
 export PROMPT='» '
+export PS1=$PROMPT
 export LYMPH_NODE_CONFIG=.lymph.yml
