@@ -1,6 +1,6 @@
-name: all
+name: node
 root: ~/lymph-talk
-pre_window: . venv/bin/activate && source env && clear
+pre_window: . venv/bin/activate && source ./env && clear
 
 windows:
     - lymph:
