@@ -1,2 +1,2 @@
-lymph
+git+https://git@github.com/deliveryhero/lymph@master#egg=lymph
 httpie
