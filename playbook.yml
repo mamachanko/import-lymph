@@ -91,6 +91,10 @@
       copy: dest=/etc/motd
             src=motd
 
+    - name: Tmux conf is present
+      copy: dest=~/.tmux.conf
+            src=tmux.conf
+
   handlers:
     - name: Restart zookeeper
       become: yes
