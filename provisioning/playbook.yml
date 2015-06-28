@@ -71,13 +71,11 @@
     - name: Requirements are installed
       pip: virtualenv={{ venv }}
            name={{ item }}
-      with_lines: cat requirements.txt
+      with_lines: cat ../requirements.txt
 
     - name: Move into ~/lymph-talk on ssh
       lineinfile: dest=~/.bashrc
                   line="cd ~/lymph-talk"
-
-    #TODO: maybe add: tmux.conf & vimrc
 
     - name: Disable default motd
       become: yes
