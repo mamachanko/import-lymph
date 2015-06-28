@@ -77,12 +77,14 @@
       lineinfile: dest=~/.bashrc
                   line="cd ~/lymph-talk"
 
+    - name: Collect default motd scripts
+      shell: ls -1 /etc/update-motd.d/*
+      register: motdscripts
+
     - name: Disable default motd
       become: yes
-      file: name={{ item }}
-            mode=-x
-      with_fileglob:
-        - /etc/update-motd.d/*
+      shell: chmod -x {{ item }}
+      with_items: '{{ motdscripts.stdout_lines }}'
 
     - name: Custom motd is present
       become: yes
