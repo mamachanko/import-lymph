@@ -235,14 +235,14 @@ instances of each in the `.lymph.yml`:
 
 ``` yaml
 instances:
-    web:
+    Web:
         command: lymph instance --config=conf/web.yml
 
-    echo:
+    Echo:
         command: lymph instance --config=conf/echo.yml
         numprocesses: 3
 
-    ear:
+    Ear:
         command: lymph instance --config=conf/ear.yml
         numprocesses: 2
 ```
