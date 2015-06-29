@@ -69,7 +69,7 @@ You can find all sources and this talk written down online. I'll share it with
 you afterwards, otherwise my appearance here is pointless ^^
 
 If you're Spanish speaker you may also want to attend this very talk in Spanish
-later this weak by Castillo.
+later this week by Castillo.
 
 If you happen to attend the PyCon France, we'll meet there too.
 
