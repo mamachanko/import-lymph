@@ -1,3 +1,4 @@
 interfaces:
     Web:
         class: web:Web
+        port: 4080
