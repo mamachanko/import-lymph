@@ -19,7 +19,6 @@ event_system:
 instances:
     Web:
         command: lymph instance --config=conf/web.yml
-        port: 4080
 
     Echo:
         command: lymph instance --config=conf/echo.yml
@@ -28,3 +27,7 @@ instances:
     Ear:
         command: lymph instance --config=conf/ear.yml
         numprocesses: 2
+
+sockets:
+    Web:
+        port: 4080

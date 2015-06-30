@@ -69,7 +69,7 @@ You can find all sources and this talk written down online. I'll share it with
 you afterwards, otherwise my appearance here is pointless ^^
 
 If you're Spanish speaker you may also want to attend this very talk in Spanish
-later this weak by Castillo.
+later this week by Castillo.
 
 If you happen to attend the PyCon France, we'll meet there too.
 
@@ -351,12 +351,15 @@ How does lymph do things under the hood?
 * http with werkzeug
 * testing
 
-### Lymph compared to Nameko
+### Lymph compared to other "frameworks"
+Nameko
 * (http://lucumr.pocoo.org/2015/4/8/microservices-with-nameko/)
 * tech
 * running
 * testing
 * only rabbitmq, no zk
+
+zerorpc, cocaine, spread, crossbar, circuits, iPOPO, ...
 
 ### Future
 * eco system (storage, storeproxy, flow etc)

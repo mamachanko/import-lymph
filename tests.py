@@ -12,8 +12,8 @@ class EchoTest(LymphServiceTestCase, EventMockTestCase):
 
     def test_echoes(self):
         self.assertEqual(
-            self.client.proxy(u'Echo').echo(text=u'hi'),
-            u'hi'
+            self.client.proxy(u'Echo').upper(text=u'hi'),
+            u'HI'
         )
         self.assert_events_emitted(call('echo', {'text': 'hi'}))
 
@@ -23,7 +23,7 @@ class WebTest(WebServiceTestCase, RpcMockTestCase):
     service_name = 'Web'
 
     def test_post(self):
-        self.update_rpc_mock('Echo.echo', 'hi!')
+        self.update_rpc_mock('Echo.echo', 'HI!')
         response = self.client.post('/echo', data='{"text": "hi"}')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, '{"text": "hi!"}')
+        self.assertEqual(response.data, '{"text": "HI!"}')
