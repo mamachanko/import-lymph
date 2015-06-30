@@ -73,7 +73,8 @@ But what we're going to talk about is lymph. By the end of the talk you should
 understand what lymph can and cannot do and why that's cool. If you achieved
 that we consider ourselves succesful.
 
-You can find all material and a transcript of this talk [online](http://mamachanko.github.io/lymph-talk).
+You can find all material and a transcript of this talk
+[online](http://mamachanko.github.io/lymph-talk).
 
 If you speak Spanish then you may also want to attend [this very
 talk](https://ep2015.europython.eu/conference/talks/deja-de-pegarte-con-tus-servicios-import-lymph)
@@ -88,37 +89,41 @@ and gummi bears.
 
 ### Motivation
 
-Our starting point was the classic situation. We had a massive Django monolith.
+Our initial situation was the classic one. We had a massive Django monolith.
 We weren't moving fast at all. We've had trouble finding rhythm for a growing
-number of teams and developers. People we're blocked by other people. You
-should think textbook "my monolith hurts, i want services". So, the perks of a
-more service-oriented became increasingly attractive and reasonable to us. This
-was even more so in the light of a global platform to unite our very
-heterogenic Product landscape. #modularity
+number of teams and developers. People we're blocked by other people. The code
+base was a big bowl of legacy spaghetti. We've had issues scaling. You should
+think of the textbook situation "my monolith hurts, i want services". So, the
+idea of a more service-oriented architecture became increasingly reasonable to
+us.  Another dimension is our heterogenic product landscape. While most
+countries websites work the same they always differ in some aspects. Modularity
+was key for us.
 
-So, the first thing some of you would be thinking is 'why write another
-framework?'. The answer was that when we looked around we did not find
+The first thing some of you would think is 'why write another
+framework?'. The answer is that when we looked around we did not find
 anything that would fit our needs. We wanted to work with services but we
 wanted some very specific things(@TODO what are these?). We are mainly
 Python-powered so we wanted to stay inside Python as much as possible. We
-wanted to abstract away all the problems one is dealing with when doind
-services, i.e. transport data, register services, discover them etc. We wanted
-to enable our developers to work with services in a simple and easy way: no
-boilerplate, no excessive details that don't relate to bussiness logic.
+wanted to abstract away all the problems one is dealing with when doing
+services. That is, developers are not supposed to worry about transporting
+data, registering services, discovering them etc. We wanted to enable our
+developers to work with services in a simple and easy way: as little
+boilerplate as possible, no details that don't relate to bussiness logic.
 
-@TODO: prepare other alternatives and related technologies and possible go over
-them (jsonrpc, zerorpc, chaussette, cocaine, ...)
+We're ging to talk about related technoglogies later.
 
-By the way, how many of you have attended the nice talk about
-[nameko](https://github.com/onefinestay/nameko)?
 
 Yes, some of you will be thinking after their nice talk 'use Nameko'. But that
 was not in the current state when we started. It also does not cover all the
-things we wanted to get from a framework. Nevermind though, we'll briefly go
-over the differences of the two later.
+things we wanted to get from a framework.
 
-So, say hello to [lymph][lymph.io]. By now, hopefully, you're itching to
-see how a service looks in lymph. Spoiler alert: very much like in nameko.
+Quick show of hands, how many of you attended Matt's talk about
+[nameko](https://github.com/onefinestay/nameko)??  Nevermind though, we'll
+briefly touch on Nameko later.
+
+But finally, say hello to [lymph](http://lymph.io). By now, hopefully, you're
+itching to see how a service looks in lymph. Spoiler alert: very much like in
+nameko.
 
 We'll break the ice by demoing running and playing around with services. We'll
 slowly progress through lymph's features, service by service.
