@@ -13,8 +13,8 @@ class Web(WebServiceInterface):
 
     def echo(self, request):
         text = json.loads(request.get_data())['text']
-        echoed = self.proxy('Echo').echo(text=text)
-        print 'http echo:', text
+        print('http echoing: %s' % text)
+        echoed = self.proxy('Echo').upper(text=text)
         return Response(
             json.dumps({'text': echoed}), content_type='application/json'
         )
