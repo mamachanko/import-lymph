@@ -101,3 +101,4 @@
       become: yes
       service: name=zookeeper
                state=started
+               enabled=yes
