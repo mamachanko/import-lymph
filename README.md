@@ -1,80 +1,88 @@
 # Stop trying to glue your services together`; import lymph`
 
-Welcome to the materials and the transcript of our talk about lymph.
+Welcome to the materials and the transcript of an introduction to
+[lymph](http://lymph.io). Lymph is a framework for writing services in Python.
 
-## Demo setup
+## Playground setup
 
-It is suggest to use the provided [vagrant](vagrantup.com) box. It is set up
-with all tooling and code ready for your perusal. It has both zookeeper and
-rabbitmq running inside. To get it up and running execute:
+We've got a [vagrant](vagrantup.com) box for you, if you want to follow along
+the talk or simply play around with services. We suggest to use, but local
+setup should be straightfoward as well.
 
-``` shell
+The box is set up with all tooling and code ready for your perusal. It has both
+[Zookeeper](http://zookeeper.apache.org/) and
+[RabbitMQ](https://www.rabbitmq.com/) running inside. Getting inside the box is
+a matter of running:
+
+```shell
 vagrant up && vagrant ssh
 ```
 
-You will be prompted for the root password half-way through `vagrant up`
+You will be prompted for your root password half-way through `vagrant up`
 because we use NFS to share files.
 
-Once inside, the `motd` contains all information you need to get going.
+Once inside the box, the `motd` contains more information on what's available.
+However, the box simply provides to the tmux sessions we use in the talk to
+explore lymph and its tooling.
 
 ## The talk
-> An introduction talk about lymph by Alejandro Castillo & Max Brauer
-
-(This is a transcript. So it might read odd here and there.)
+> An introduction to lymph by Alejandro Castillo & Max Brauer
 
 ### Opening
 
-Hello and good afternoon. Hopefully you've had a nice lunch. My name is
-\<name\> and I'd like to introduce you to _lymph_, a framework for writing
-services in Python. With lymph you can write services with almost no
+Hello, we'd like to introduce you to [lymph](http://lymph.io) a framework for
+writing services in Python. With lymph you can write services with almost no
 boilerplate. But let me introduce us first.
 
-We're Delivery Hero, a holding of online food ordering services world-wide.
-We're located in Berlin. We operate in 34 countries and growing.
+We're [Delivery Hero](http://deliveryhero.com), a holding of online
+food-ordering services. We're located in Berlin. We operate in 34 countries
+and growing.
 
-Let me explain the concept of online food ordering to those who're unfamiliar
-with it. However, I doubt there arent any ;) The concept is simple:
+Let me explain the concept of online food-ordering to those who're unfamiliar
+with it. However, I doubt this is news to anyone, The concept is simple:
 * get hungry
 * go online
 * search for restaurants close to you
 * compile your order
 * pay online
 * wait for the delivery
-Basically, it's e-commerce with very grumpy customers. But the restaurant
-integration, e.g. order transmission, fulfillment, delivery, etc. offer quite
-an ecosystem of things to tackle.
+Basically, it's e-commerce with very grumpy customers. Nonetheless, the
+restaurant integration, e.g. order transmission, fulfillment, delivery, etc.
+offer quite an ecosystem of things to tackle.
 
-Let's briefly go over the flow of our talk:
-* We're going to explain where we're coming from and why we have given birth
-  to another framework
-* We'll look at code as fast possible
-* We'll run services and increasingly add new services to explore communication
-  patterns and characteristics of lymph
-* We'll give you a brief rundown of lymph's internal
-* We'll go over how lymph is different from nameko
-* We'll talk future plans
+What are we going to talk about? Let's briefly go over the flow of our talk:
+1. We're going to explain where we're coming from and why we have given birth
+   to a(nother) framework
+1. We'll look at code as fast possible
+1. We'll run services and increasingly add new services to explore communication
+   patterns and the tooling of lymph
+1. We'll briefly talk about how lymoh does things under the hood
+1. We'll touch on similar technology and how it relates to lymph (Nameko in
+   particular)
+1. We'll talk future plans for lymph and its ecosystem
+1. That's it :)
 
 For the sake of this talk we assume that you're familiar with the concept of
 services. We assume that you are familiar with what a monolith is. We assume
 that you are familiar with when and why to use either and even more so when
 not. We will not discuss the differences between monoliths and services. We
 won't talk about how services might safe your development or your business.
-Neither will talk about sophisticated networking topologies on how to plug
-services together.
+Neither will we talk about sophisticated networking topologies.
 
 But what we're going to talk about is lymph. By the end of the talk you should
-understand what lymph can and cannot do and why that's cool.
+understand what lymph can and cannot do and why that's cool. If you achieved
+that we consider ourselves succesful.
 
-You can find all sources and this talk written down online. I'll share it with
-you afterwards, otherwise my appearance here is pointless ^^
+You can find all material and a transcript of this talk [online](http://mamachanko.github.io/lymph-talk).
 
-If you're Spanish speaker you may also want to attend this very talk in Spanish
-later this week by Castillo.
+If you speak Spanish then you may also want to attend [this very
+talk](https://ep2015.europython.eu/conference/talks/deja-de-pegarte-con-tus-servicios-import-lymph)
+in Spanish later this week by Castillo.
 
-If you happen to attend the PyCon France, we'll meet there too.
+If you happen to attend the PyCon France, we'll be ther too.
 
-You can find us in the foyer. Talk to us :) We've brought goodies and gummi
-bears.
+Also, you can find us at our sponsor table in the foyer. We've brought goodies
+and gummi bears.
 
 (repeat all this in the end)
 
