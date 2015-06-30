@@ -1,6 +1,8 @@
 # Stop trying to glue your services together`; import lymph`
 
-## Setup
+Welcome to the materials and the transcript of our talk about lymph.
+
+## Demo setup
 
 It is suggest to use the provided [vagrant](vagrantup.com) box. It is set up
 with all tooling and code ready for your perusal. It has both zookeeper and
@@ -19,6 +21,8 @@ Once inside, the `motd` contains all information you need to get going.
 > An introduction talk about lymph by Alejandro Castillo & Max Brauer
 
 (This is a transcript. So it might read odd here and there.)
+
+### Opening
 
 Hello and good afternoon. Hopefully you've had a nice lunch. My name is
 \<name\> and I'd like to introduce you to _lymph_, a framework for writing
@@ -74,6 +78,8 @@ bears.
 
 (repeat all this in the end)
 
+### Motivation
+
 Our starting point was the classic situation. We had a massive Django monolith.
 We weren't moving fast at all. We've had trouble finding rhythm for a growing
 number of teams and developers. People we're blocked by other people. You
@@ -109,9 +115,11 @@ see how a service looks in lymph. Spoiler alert: very much like in nameko.
 We'll break the ice by demoing running and playing around with services. We'll
 slowly progress through lymph's features, service by service.
 
-[show Echo service code]
-
 ### Demo
+
+#### The Echo service
+
+[show Echo service code]
 
 Et voila. This is what a simple echo service looks like in lymph. Its interface
 is one RPC method called `echo` which takes text, prints it, emits an
@@ -157,8 +165,6 @@ command. Therefore, we have to provide the service name, the name of the method
 and the body of the request as JSON. What we expect to see is the echo service
 to return the text as is, but it should also print it and emit an event.
 
-@TODO: think of a way to display `lymph emit` that is not confusing and doesn't harm flow.
-
 ``` shell
 lymph request Echo.echo '{"text": "Good afternoon, EuroPython!"}'
 ```
@@ -167,6 +173,8 @@ The result of the RPC is as expected and the service printed the text.
 
 This is boring and our service must be pretty lonely. Nobody listens to its
 events. Here comes the ear.
+
+#### The Ear service
 
 [show Ear service code]
 
@@ -217,9 +225,11 @@ As you see, our expectations are met.
 If we were to run several instances of the ear services, each event would be
 consumed by exactly once instance. However, lymph allows to broadcast events.
 
-Finally, since it's 2015, let's add a web service to the mix. Let's say we
-wanted to expose the echo functionality via an HTTP API. Lymph has a class for
-that.
+Finally, since it's 2015, no talk would be complete without talking about HTTP.
+Let's add a web service to the mix. Let's say we wanted to expose the echo
+functionality via an HTTP API. Lymph has a class for that.
+
+#### The Web service
 
 [show Web service code]
 
@@ -257,6 +267,8 @@ http localhost:4080/echo text=hi
 ```
 
 The response looks good and all services have performed accordingly.
+
+#### Lymph's development server
 
 Yet, when developing locally you seldomly would want to run all of your
 services within different shell or tmux panes. Lymph has its own development
@@ -320,69 +332,50 @@ And indeed we see the same trace_id across our service instances.
 And that mostly covers the tooling we have for lymph services. Let's talk about
 lymph's stack next.
 
-## Lymph
-...
+#### Things we haven't touched
+* lymph subscribe
+* lymph shell
+* config API
+* on_start
+* metrics
+* plugins (new relic, sentry, lymph-top)
 
-## Flow notes
-### Introduction
-* Hello
-* this is who we are
-* company
-* this is what we do
-* what is this (what is lymph in a nutshell)
-* why are we doing this (reasons)
+### Lymph under the hood
 
-### lymph
-* sample (with local events and static registry)
- * introduce sample services / scenario
- * show them(code) and explain them
- * introduce echo
- * configure it
- * show tooling (run it, discover and inspect)
- * make a request
- * introduce listener
- * show tooling (run it, discover (and inspect))
- * (run more than one instance)
- * make a request
- * emit events, subscribe
- * introduce web
- * curl
- * show traceid in logs
-* show sample with rabbitmq and zk
- * proves claim
+How does lymph do things under the hood?
 
-### high-level architecture
 * greenlets
 * rpc via 0mq
 * events via rabbitmq (pluggable)
 * registry via zk (pluggable)
 * http with werkzeug
 * testing
-* TestCases
 
-### compare with nameko
+### Lymph compared to Nameko
 * (http://lucumr.pocoo.org/2015/4/8/microservices-with-nameko/)
 * tech
 * running
 * testing
+* only rabbitmq, no zk
 
-### future
+### Future
 * eco system (storage, storeproxy, flow etc)
 * distconfig
 
-### summary and outro
+### Summary & outro
 * did we accomplish? circle back to claim and title
 * lymph.io
 * we accept PRs
 * we're hiring
+* same talk in Spanish
+* PyCon Fr
 
 ### Q&A
 * why zookeeper for registry?
 * how to scale up web services? (sharing sockets)
  
-### nice-to-have
+### Nice to have
 * plugins (lymph-top, newrelic, sentry)
 * monitoring
 * serial events & broadcast(websockets)
 * sieve of Erathostenes (Mislav)
-
