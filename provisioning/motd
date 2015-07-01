@@ -1,3 +1,4 @@
+
    "                                  m           ""#                         #     
  mmm    mmmmm  mmmm    mmm    m mm  mm#mm           #    m   m  mmmmm  mmmm   # mm  
    #    # # #  #" "#  #" "#   #"  "   #             #    "m m"  # # #  #" "#  #"  # 
@@ -17,7 +18,7 @@ Choose one of them and start it, e.g.:
 
   $ mux start all
 
-(Tmux' prefix is changed to be C-w. You move between panes like in vim.)
+(tmux' prefix is changed to be C-w. You move between panes like in vim.)
 
 You will find yourself inside a tmux session with panes set up and services
 running. If in doubt, run:
