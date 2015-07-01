@@ -1,4 +1,4 @@
-name: echo
+name: greeting
 root: ~/lymph-talk
 pre_window: . venv/bin/activate && source ./env && clear
 
@@ -8,6 +8,6 @@ windows:
         panes:
             - client:
                 - toilet client
-            - echo:
-                - toilet echo
-                - lymph instance --config=conf/echo.yml --reload
+            - greeting:
+                - toilet greeting
+                - lymph instance --config=conf/greeting.yml --reload

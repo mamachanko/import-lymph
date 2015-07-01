@@ -1,4 +1,4 @@
-name: all
+name: greeting-listen
 root: ~/lymph-talk
 pre_window: . venv/bin/activate && source ./env && clear
 
@@ -8,11 +8,11 @@ windows:
         panes:
             - client:
                 - toilet client
-            - web:
-                - toilet web
-                - lymph instance --config=conf/web.yml --reload
-            - greeting:
-                - toilet greeting
+            - greeting1:
+                - toilet greeting1
+                - lymph instance --config=conf/greeting.yml --reload
+            - greeting2:
+                - toilet greeting2
                 - lymph instance --config=conf/greeting.yml --reload
             - listen:
                 - toilet listen
