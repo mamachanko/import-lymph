@@ -5,7 +5,7 @@ Welcome to the materials and the transcript of an introduction to
 
 ## Playground setup
 
-We've got a [vagrant](vagrantup.com) box for you, if you want to follow along
+We've got a [vagrant](http://vagrantup.com) box for you, if you want to follow along
 the talk or simply play around with services. We suggest to use, but local
 setup should be straightfoward as well.
 
@@ -132,12 +132,10 @@ slowly progress through lymph's features, service by service.
 
 #### The greeting service
 
-[show Greeting service code]
-
-Et voila. This is what a simple greeting service looks like in lymph. Its
-interface is one RPC method called `greet` which takes a name, prints it,
-emits an event(containing the text in the body) and returns a greeting for the
-given name.
+[This](services/greeting.py) is what a simple greeting service looks like in
+lymph. Its interface is one RPC method called `greet` which takes a name,
+prints it, emits an event(containing the text in the body) and returns a
+greeting for the given name.
 
 All we need to do to make things happen is to inherit from `lymph.Interface`
 and decorate RPC methods with `@lymph.rpc()`. Lastly, we've got the interface's
@@ -193,13 +191,11 @@ events. Here comes a listener.
 
 #### The listen service
 
-[show Listen service code]
-
-The listen service listens to greeting's events Again, it's a lymph service(we
-inherit from `lymph.Interface`). However, there's nothing but one method which
-is subscribed to `greeting` events. It simply prints the greeted name contained
-in the event's body. Everytime an event of this type occurs exactly
-once instance of the listen service will consume it.
+The [listen service](services/listen.py) listens to greeting's events Again,
+it's a lymph service(we inherit from `lymph.Interface`). However, there's
+nothing but one method which is subscribed to `greeting` events. It simply
+prints the greeted name contained in the event's body. Everytime an event of
+this type occurs exactly once instance of the listen service will consume it.
 
 Let's excercise our services combination. This time round, though, we'll run
 two instances of the greeting service and one instance of the listen service.
@@ -251,12 +247,11 @@ functionality via an HTTP API. Lymph has a class for that.
 
 #### The web service
 
-[show Web service code]
-
-This is the Web service. It subclasses lymph's `WebServiceInterface`. In this
-case we're not exposing RPC methods, emitting not listening to events. However,
-we configure a Werkzeug URL map as a class attribute. We've added one endpoint:
-`/greet` and a handler for it. The handler receives a Werkzeug reuqest object.
+[This](services/web.py) is the Web service. It subclasses lymph's
+`WebServiceInterface`. In this case we're not exposing RPC methods, emitting
+not listening to events. However, we configure a Werkzeug URL map as a class
+attribute. We've added one endpoint: `/greet` and a handler for it. The handler
+receives a Werkzeug reuqest object.
 
 The greet handler expects a name to be present in the query string. It calls
 the greeting service via the `self.proxy` and returns the result in the
