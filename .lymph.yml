@@ -19,6 +19,7 @@ event_system:
 instances:
     Web:
         command: lymph instance --config=conf/web.yml
+        numprocesses: 2
 
     Greeting:
         command: lymph instance --config=conf/greeting.yml
@@ -26,7 +27,7 @@ instances:
 
     Listen:
         command: lymph instance --config=conf/listen.yml
-        numprocesses: 2
+        numprocesses: 4
 
 
 sockets:

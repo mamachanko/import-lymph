@@ -137,6 +137,19 @@ lymph. Its interface is one RPC method called `greet` which takes a name,
 prints it, emits an event(containing the text in the body) and returns a
 greeting for the given name.
 
+```python
+import lymph
+
+
+class Greeting(lymph.Interface):
+
+    @lymph.rpc()
+    def greet(self, name):
+        print('Saying hi to %s' % name)
+        self.emit('greeting', {'name': name})
+        return u'Hi, %s!' % name
+```
+
 All we need to do to make things happen is to inherit from `lymph.Interface`
 and decorate RPC methods with `@lymph.rpc()`. Lastly, we've got the interface's
 `emit()` function to our disposal which dispatches events in the event system.
@@ -150,6 +163,22 @@ Let's jump on the shell and play with it.
 What you see here is a tmux session with two panes. On the right-hand side you
 see the greeting service being run with lymph's `instance` command. On the
 left-hand side you see a plain shell on which we'll explore lymph's tooling.
+
+Every time you want to run an instance of a servcie you need to point lymph to
+its configuration. The configuration tells lymph about the interface's name and
+where it can import it from. Since lymph imports the interface, its modulea
+needs to be on the `PYTHONPATH`. Why can make this happen with `export
+PYTHONPATH=services` in our example. But worry not, the tmuxinator sessions
+take care of it for you. Our service's configuration looks like
+[this](conf/greeting.yml):
+
+```yaml
+interfaces:
+    Greeting:
+        class: greeting:Greeting
+```
+
+The `lymph instance` command receives the path to this file.
 
 One of the first things we considered when building lymph was the tooling. We
 think we managed to get some very nice tooling built around it to make
@@ -178,7 +207,7 @@ command. Therefore, we have to provide the service name, the name of the method
 and the body of the request as JSON. What we expect to see is the echo service
 to return the text as is, but it should also print it and emit an event.
 
-``` shell
+```shell
 » lymph request Greeting.greet '{"name": "Joe"}'
 u'Hi, Joe!'
 ```
@@ -197,8 +226,22 @@ nothing but one method which is subscribed to `greeting` events. It simply
 prints the greeted name contained in the event's body. Everytime an event of
 this type occurs exactly once instance of the listen service will consume it.
 
+```python
+import lymph
+
+
+class Listen(lymph.Interface):
+
+    @lymph.event('greeting')
+    def on_greeting(self, event):
+        print('Somebody greeted %s' % event['name'])
+```
+
 Let's excercise our services combination. This time round, though, we'll run
 two instances of the greeting service and one instance of the listen service.
+
+The [listen service's configuration](conf/listen.yml) is no different from the
+one before.
 
 ``` shell
 » mux start greeting-listen
@@ -251,7 +294,27 @@ functionality via an HTTP API. Lymph has a class for that.
 `WebServiceInterface`. In this case we're not exposing RPC methods, emitting
 not listening to events. However, we configure a Werkzeug URL map as a class
 attribute. We've added one endpoint: `/greet` and a handler for it. The handler
-receives a Werkzeug reuqest object.
+receives a Werkzeug request object.
+
+```python
+from lymph.web.interfaces import WebServiceInterface
+from werkzeug.routing import Map, Rule
+from werkzeug.wrappers import Response
+
+
+class Web(WebServiceInterface):
+
+    url_map = Map([
+        Rule('/greet', endpoint='greet'),
+    ])
+
+    def greet(self, request):
+        name = request.args['name']
+        print('About to greet %s' % name)
+        return Response(
+            self.proxy('Greeting').greet(name=name)
+        )
+```
 
 The greet handler expects a name to be present in the query string. It calls
 the greeting service via the `self.proxy` and returns the result in the
@@ -261,6 +324,9 @@ Mind, that we're not validating the request method nor anything else.
 
 Run it or it didn't happen, they say. We'll bring up an instance of each of
 services now.
+
+Once more, the [web service's configuration](conf/web.yml) is no different from
+the ones we looked at before.
 
 ``` shell
 » mux start all
@@ -301,12 +367,13 @@ Yet, when developing locally you seldomly would want to run all of your
 services within different shell or tmux panes. Lymph has its own development
 server which wraps around any number of services with any number of instances
 each. Therefore, we'll have to configure which services to run and how many
-instances of each in the `.lymph.yml`:
+instances of each in the [`.lymph.yml`](.lymph.yml):
 
-``` yaml
+```yaml
 instances:
     Web:
         command: lymph instance --config=conf/web.yml
+        numprocesses: 2
 
     Greeting:
         command: lymph instance --config=conf/greeting.yml
@@ -314,13 +381,21 @@ instances:
 
     Listen:
         command: lymph instance --config=conf/listen.yml
-        numprocesses: 2
+        numprocesses: 4
+
+
+sockets:
+    Web:
+        port: 4080
 ```
+
+(Since we run several instances of our web service we have to configure shared
+sockets.)
 
 Mind that in our case `command` specifies lymph instances but this could also
 be any other service you need, e.g. Redis.
 
-Let's run them all.
+Let's bring them all up.
 
 ``` shell
 » mux start all
@@ -333,9 +408,9 @@ instances are running:
 
 ``` shell
 » lymph discover
-Web [1]
+Web [2]
 Greeting [3]
-Listen [2]
+Listen [4]
 ```
 
 That's a good number. Once we feed a request into the cluster we should see
