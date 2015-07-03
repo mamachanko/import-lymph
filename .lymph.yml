@@ -20,13 +20,14 @@ instances:
     Web:
         command: lymph instance --config=conf/web.yml
 
-    Echo:
-        command: lymph instance --config=conf/echo.yml
+    Greeting:
+        command: lymph instance --config=conf/greeting.yml
         numprocesses: 3
 
-    Ear:
-        command: lymph instance --config=conf/ear.yml
+    Listen:
+        command: lymph instance --config=conf/listen.yml
         numprocesses: 2
+
 
 sockets:
     Web:

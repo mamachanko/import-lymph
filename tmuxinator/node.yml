@@ -14,4 +14,4 @@ windows:
             - tail:
                 - sleep 1
                 - toilet tail
-                - lymph tail Web Echo Ear
+                - lymph tail Web Greeting Listen
