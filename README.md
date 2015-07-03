@@ -146,7 +146,7 @@ class Greeting(lymph.Interface):
     @lymph.rpc()
     def greet(self, name):
         print('Saying hi to %s' % name)
-        self.emit('greeting', {'name': name})
+        self.emit('greeted', {'name': name})
         return u'Hi, %s!' % name
 ```
 
@@ -222,7 +222,7 @@ events. Here comes a listener.
 
 The [listen service](services/listen.py) listens to greeting's events Again,
 it's a lymph service(we inherit from `lymph.Interface`). However, there's
-nothing but one method which is subscribed to `greeting` events. It simply
+nothing but one method which is subscribed to `greeted` events. It simply
 prints the greeted name contained in the event's body. Everytime an event of
 this type occurs exactly once instance of the listen service will consume it.
 
@@ -232,8 +232,8 @@ import lymph
 
 class Listen(lymph.Interface):
 
-    @lymph.event('greeting')
-    def on_greeting(self, event):
+    @lymph.event('greeted')
+    def on_greeted(self, event):
         print('Somebody greeted %s' % event['name'])
 ```
 
@@ -260,12 +260,12 @@ Listen [1]
 
 And, indeed, they list correctly.
 
-Let's emit a `greeting` event in the event system to assert whether the listen
+Let's emit a `greeted` event in the event system to assert whether the listen
 service listens to it. We'll use lymph's `emit` command. We're expecting the
 listen service to print the name field from the event body.
 
 ```
-» lymph emit echo '{"greeting": "Joe"}'
+» lymph emit echo '{"greeted": "Joe"}'
 ```
 
 Nice. That worked.
