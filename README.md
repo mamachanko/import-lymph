@@ -5,7 +5,7 @@ Welcome to the materials and the transcript of an introduction to
 
 ## Playground setup
 
-We've got a [vagrant](vagrantup.com) box for you, if you want to follow along
+We've got a [vagrant](http://vagrantup.com) box for you, if you want to follow along
 the talk or simply play around with services. We suggest to use, but local
 setup should be straightfoward as well.
 
@@ -130,13 +130,25 @@ slowly progress through lymph's features, service by service.
 
 ### Demo
 
-#### The Echo service
+#### The greeting service
 
-[show Echo service code]
+[This](services/greeting.py) is what a simple greeting service looks like in
+lymph. Its interface is one RPC method called `greet` which takes a name,
+prints it, emits an event(containing the text in the body) and returns a
+greeting for the given name.
 
-Et voila. This is what a simple echo service looks like in lymph. Its interface
-is one RPC method called `echo` which takes text, prints it, emits an
-event(containing the text in the body) and returns the text.
+```python
+import lymph
+
+
+class Greeting(lymph.Interface):
+
+    @lymph.rpc()
+    def greet(self, name):
+        print('Saying hi to %s' % name)
+        self.emit('greeting', {'name': name})
+        return u'Hi, %s!' % name
+```
 
 All we need to do to make things happen is to inherit from `lymph.Interface`
 and decorate RPC methods with `@lymph.rpc()`. Lastly, we've got the interface's
@@ -145,12 +157,28 @@ and decorate RPC methods with `@lymph.rpc()`. Lastly, we've got the interface's
 Let's jump on the shell and play with it.
 
 ``` shell
-mux start echo
+» mux start greeting
 ```
 
 What you see here is a tmux session with two panes. On the right-hand side you
-see the echo service being run with lymph's `instance` command. On the
+see the greeting service being run with lymph's `instance` command. On the
 left-hand side you see a plain shell on which we'll explore lymph's tooling.
+
+Every time you want to run an instance of a servcie you need to point lymph to
+its configuration. The configuration tells lymph about the interface's name and
+where it can import it from. Since lymph imports the interface, its modulea
+needs to be on the `PYTHONPATH`. Why can make this happen with `export
+PYTHONPATH=services` in our example. But worry not, the tmuxinator sessions
+take care of it for you. Our service's configuration looks like
+[this](conf/greeting.yml):
+
+```yaml
+interfaces:
+    Greeting:
+        class: greeting:Greeting
+```
+
+The `lymph instance` command receives the path to this file.
 
 One of the first things we considered when building lymph was the tooling. We
 think we managed to get some very nice tooling built around it to make
@@ -159,7 +187,7 @@ development of services easier.
 So what tooling is available? `lymph list` will tell us.
 
 ``` shell
-lymph list
+» lymph list
 ```
 
 You see there's plenty of commands available to interact with services.
@@ -168,118 +196,170 @@ To begin with let's assert that an instance of the echo service is running.
 We'll use lymph's `discover` command.
 
 ``` shell
-lymph discover
+» lymph discover
+Greeting [1]
 ```
 
-As you can see, one instance is running indeed (`Echo [1]`).
+As you can see, one instance is running indeed (`Greeting [1]`).
 
-Let's excercise the echo service's `echo` method. We'll use lymph's `request`
+Let's excercise the service's `greet` method. We'll use lymph's `request`
 command. Therefore, we have to provide the service name, the name of the method
 and the body of the request as JSON. What we expect to see is the echo service
 to return the text as is, but it should also print it and emit an event.
 
-``` shell
-lymph request Echo.echo '{"text": "Good afternoon, EuroPython!"}'
+```shell
+» lymph request Greeting.greet '{"name": "Joe"}'
+u'Hi, Joe!'
 ```
 
-The result of the RPC is as expected and the service printed the text.
+The result of the RPC is `'Hi, Joe!'` as expected and the service printed the
+name.
 
 This is boring and our service must be pretty lonely. Nobody listens to its
-events. Here comes the ear.
+events. Here comes a listener.
 
-#### The Ear service
+#### The listen service
 
-[show Ear service code]
+The [listen service](services/listen.py) listens to greeting's events Again,
+it's a lymph service(we inherit from `lymph.Interface`). However, there's
+nothing but one method which is subscribed to `greeting` events. It simply
+prints the greeted name contained in the event's body. Everytime an event of
+this type occurs exactly once instance of the listen service will consume it.
 
-The ear listens to echo's events. Pardon the pun. Again, it's a lymph
-service(we inherit from `lymph.Interface`). However, there's nothing but one
-method which is subscribed to `echo` events. It simply prints the text contained
-in the event's body. That means, everytime an event of this type occurs
-exactly once instance of ear will consume it.
+```python
+import lymph
 
-Let's excercise our services combination. This time round, though, we'll run
-two instances of the echo service and one instance of the ear service.
 
-``` shell
-mux start echo-ear
+class Listen(lymph.Interface):
+
+    @lymph.event('greeting')
+    def on_greeting(self, event):
+        print('Somebody greeted %s' % event['name'])
 ```
 
-Again, we see a tmux session. On the right you find two instances of the echo
-service followed by an instance of the ear service.
+Let's excercise our services combination. This time round, though, we'll run
+two instances of the greeting service and one instance of the listen service.
+
+The [listen service's configuration](conf/listen.yml) is no different from the
+one before.
+
+``` shell
+» mux start greeting-listen
+```
+
+Again, we see a tmux session. On the right you find two instances of the
+greeting service followed by an instance of the listen service.
 
 We should find them registered correctly.
 
 ``` shell
-lymph discover
+» lymph discover
+Greeting [1]
+Listen [1]
 ```
 
 And, indeed, they list correctly.
 
-Let's emit an echo event in the event system to assert whether the ear service
-listens to it. We'll use lymph's `emit` command. We're expecting the ear to
-print the text field from the event body.
+Let's emit a `greeting` event in the event system to assert whether the listen
+service listens to it. We'll use lymph's `emit` command. We're expecting the
+listen service to print the name field from the event body.
 
 ```
-lymph emit echo '{"text": "hi"}'
+» lymph emit echo '{"greeting": "Joe"}'
 ```
 
 Nice. That worked.
 
-When we do RPCs now we expect the echo instances to respond in round-robin
-fashion. Furthermore, the ear instance should print all consumed events.
+When we do RPCs now we expect the greeting instances to respond in round-robin
+fashion while the listen instance should rect to all occuring events.
 
 ``` shell
-lymph request Echo.echo '{"text": "Good afternoon, EuroPython!"}'
+» lymph request Greeting.greet '{"name": "Joe"}'                                │
+u'Hi, Joe!'
 ```
-(repeatedly, until both echo instances have responded)
+(do this repeatedly, until both greeting instances have responded)
 
 As you see, our expectations are met.
 
-If we were to run several instances of the ear services, each event would be
+If we were to run several instances of the listen services, each event would be
 consumed by exactly once instance. However, lymph allows to broadcast events.
 
 Finally, since it's 2015, no talk would be complete without talking about HTTP.
-Let's add a web service to the mix. Let's say we wanted to expose the echo
+Let's add a web service to the mix. Let's say we wanted to expose the greeting
 functionality via an HTTP API. Lymph has a class for that.
 
-#### The Web service
+#### The web service
 
-[show Web service code]
+[This](services/web.py) is the Web service. It subclasses lymph's
+`WebServiceInterface`. In this case we're not exposing RPC methods, emitting
+not listening to events. However, we configure a Werkzeug URL map as a class
+attribute. We've added one endpoint: `/greet` and a handler for it. The handler
+receives a Werkzeug request object.
 
-This is the Web service. It subclasses lymph's `WebServiceInterface`. In this
-case we're not exposing RPC methods, emitting not listening to events. However,
-we configure a Werkzeug URL map as a class attribute. We've added one endpoint:
-`/echo` and a handler for it. The handler receives a Werkzeug reuqest object.
+```python
+from lymph.web.interfaces import WebServiceInterface
+from werkzeug.routing import Map, Rule
+from werkzeug.wrappers import Response
 
-The echo handler unpacks the body of the request. It calls the echo service
-via the `self.proxy` and returns the result in the response. And it prints.
+
+class Web(WebServiceInterface):
+
+    url_map = Map([
+        Rule('/greet', endpoint='greet'),
+    ])
+
+    def greet(self, request):
+        name = request.args['name']
+        print('About to greet %s' % name)
+        return Response(
+            self.proxy('Greeting').greet(name=name)
+        )
+```
+
+The greet handler expects a name to be present in the query string. It calls
+the greeting service via the `self.proxy` and returns the result in the
+response. And it prints.
 
 Mind, that we're not validating the request method nor anything else.
 
-Run it or it didn't happen. We'll bring up an instance of each of services now.
+Run it or it didn't happen, they say. We'll bring up an instance of each of
+services now.
+
+Once more, the [web service's configuration](conf/web.yml) is no different from
+the ones we looked at before.
 
 ``` shell
-mux start all
+» mux start all
 ```
 
-On the right you can see an instance of every service, Web, Echo and Ear.
+On the right you can see an instance of every service: web, greeting and
+listen.
 
 Once again, they should have registered correctly:
 
 ``` shell
-lymph discover
+» lymph discover
+Web [1]
+Greeting [1]
+Listen [1]
 ```
 
-Let's hit our web service and see how the request ripples through our service
-cluster. We should see all service print something. The web service is
+Let's hit our web service and see how the request penetrates our service
+landscape. We should see all service print something. The web service is
 listening at the default port 4080. We're using `httpie` to excercise the
 request:
 
 ```
-http localhost:4080/echo text=hi
+» http localhost:4080/greet?name=joe
+HTTP/1.1 200 OK
+Content-Length: 8
+Content-Type: text/plain; charset=utf-8
+Date: Fri, 03 Jul 2015 13:55:29 GMT
+
+Hi, joe!
 ```
 
-The response looks good and all services have performed accordingly.
+The response looks good and all services should have performed accordingly.
 
 #### Lymph's development server
 
@@ -287,62 +367,80 @@ Yet, when developing locally you seldomly would want to run all of your
 services within different shell or tmux panes. Lymph has its own development
 server which wraps around any number of services with any number of instances
 each. Therefore, we'll have to configure which services to run and how many
-instances of each in the `.lymph.yml`:
+instances of each in the [`.lymph.yml`](.lymph.yml):
 
-``` yaml
+```yaml
 instances:
     Web:
         command: lymph instance --config=conf/web.yml
+        numprocesses: 2
 
-    Echo:
-        command: lymph instance --config=conf/echo.yml
+    Greeting:
+        command: lymph instance --config=conf/greeting.yml
         numprocesses: 3
 
-    Ear:
-        command: lymph instance --config=conf/ear.yml
-        numprocesses: 2
+    Listen:
+        command: lymph instance --config=conf/listen.yml
+        numprocesses: 4
+
+
+sockets:
+    Web:
+        port: 4080
 ```
+
+(Since we run several instances of our web service we have to configure shared
+sockets.)
 
 Mind that in our case `command` specifies lymph instances but this could also
 be any other service you need, e.g. Redis.
 
-Let's run it.
+Let's bring them all up.
 
 ``` shell
-mux start all
+» mux start all
 ```
 
 Once more, we find ourselves inside a tmux session with lymph node running in
-the top-right pane. Below that you see lymph tail running which allows us to
-follow the logs of any number of services. But first, let's check how many instances
-are running:
+the top-right pane. Below that you see `lymph tail` running which allows us to
+follow the logs of any number of services. But first, let's check how many
+instances are running:
 
 ``` shell
-lymph discover
+» lymph discover
+Web [2]
+Greeting [3]
+Listen [4]
 ```
 
-That's a good number. Once we feed a request into the cluster we should see print
-statements and logs appearing.
+That's a good number. Once we feed a request into the cluster we should see
+print statements and logs appearing.
 
 ``` shell
-http localhost:4080/echo text=hi
+» http localhost:4080/greet?name=joe
+HTTP/1.1 200 OK
+Content-Length: 8
+Content-Type: text/plain; charset=utf-8
+Date: Fri, 03 Jul 2015 13:55:29 GMT
+
+Hi, joe!
 ```
 
-But there's a lot going on. You would find an even bigger mess the more
+There's a lot going on in the tail pane. You would find an even bigger mess the more
 services and instances you run and the more intricated your patterns of
 communication become. Sometimes you wonder "where did my request go?". Lymph
 helps you though with `trace\_id`s. Every request that appears in our cluster
-which doesn't have a trace_id assigned gets one. These trace_ids get fowarded
+which doesn't have a trace id assigned gets one. These trace ids get fowarded
 via every RPC and event.
 
 So we should be able to corellate all actions in cluster to the one incoming
-HTTP request.
+HTTP request. If you check the logs within the tail pane you should see that
+all logs can be related with the `trace_id`. And indeed we see the same
+`trace_id` across our service instances for every incoming request.
 
 [use iterms highlighting: Ctrl+f and type 'trace_id']
 
-And indeed we see the same trace_id across our service instances.
-
-And that mostly covers the tooling we have for lymph services. Let's talk about
+That mostly covers the tooling we have for lymph services. Let's talk about
 lymph's stack next.
 
 #### Things we haven't touched
