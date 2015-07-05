@@ -1,18 +1,19 @@
-# Stop trying to glue your services together`; import lymph`
+# `import lymph`
 
-Welcome to the materials and the transcript of an introduction to
-[lymph](http://lymph.io). Lymph is a framework for writing services in Python.
+Welcome to an an introduction to [lymph](http://lymph.io). Lymph is a framework
+for writing services in Python.
 
 ## Playground setup
 
-We've got a [vagrant](http://vagrantup.com) box for you, if you want to follow along
-the talk or simply play around with services. We suggest to use, but local
-setup should be straightfoward as well.
+We've got a [vagrant](http://vagrantup.com) box for you with lymph services
+inside. We suggest you use it, but local setup should be straightfoward as
+well.
 
-The box is set up with all tooling and code ready for your perusal. It has both
-[Zookeeper](http://zookeeper.apache.org/) and
-[RabbitMQ](https://www.rabbitmq.com/) running inside. Getting inside the box is
-a matter of running:
+The box provisions with all tooling and code ready for your perusal. It has
+both [Zookeeper](http://zookeeper.apache.org/) and
+[RabbitMQ](https://www.rabbitmq.com/) running inside. Services and lymph's
+tooling can be explored within tmuxinator projects. Getting inside the box is a
+matter of running:
 
 ```shell
 vagrant up && vagrant ssh
@@ -22,8 +23,6 @@ You will be prompted for your root password half-way through `vagrant up`
 because we use NFS to share files.
 
 Once inside the box, the `motd` contains more information on what's available.
-However, the box simply provides to the tmux sessions we use in the talk to
-explore lymph and its tooling.
 
 ## The talk
 > An introduction to lymph by Alejandro Castillo & Max Brauer
@@ -32,7 +31,7 @@ explore lymph and its tooling.
 
 Hello, we'd like to introduce you to [lymph](http://lymph.io) a framework for
 writing services in Python. With lymph you can write services with almost no
-boilerplate. But let me introduce us first.
+boilerplate. But let we should introduce ourselves first.
 
 We're [Delivery Hero](http://deliveryhero.com), a holding of online
 food-ordering services. We're located in Berlin. We operate in 34 countries
@@ -110,16 +109,7 @@ data, registering services, discovering them etc. We wanted to enable our
 developers to work with services in a simple and easy way: as little
 boilerplate as possible, no details that don't relate to bussiness logic.
 
-We're ging to talk about related technoglogies later.
-
-
-Yes, some of you will be thinking after their nice talk 'use Nameko'. But that
-was not in the current state when we started. It also does not cover all the
-things we wanted to get from a framework.
-
-Quick show of hands, how many of you attended Matt's talk about
-[nameko](https://github.com/onefinestay/nameko)??  Nevermind though, we'll
-briefly touch on Nameko later.
+We're ging to talk about similar technoglogies later.
 
 But finally, say hello to [lymph](http://lymph.io). By now, hopefully, you're
 itching to see how a service looks in lymph. Spoiler alert: very much like in
@@ -435,46 +425,101 @@ via every RPC and event.
 
 So we should be able to corellate all actions in cluster to the one incoming
 HTTP request. If you check the logs within the tail pane you should see that
-all logs can be related with the `trace_id`. And indeed we see the same
-`trace_id` across our service instances for every incoming request.
+all logs can be related with the `trace\_id`. And indeed we see the same
+`trace\_id` across our service instances for every incoming request.
 
-[use iterms highlighting: Ctrl+f and type 'trace_id']
+That mostly covers the tooling we have for lymph services.
 
-That mostly covers the tooling we have for lymph services. Let's talk about
-lymph's stack next.
+### Further features
 
-#### Things we haven't touched
-* lymph subscribe
-* lymph shell
-* config API
-* on_start
-* metrics
-* plugins (new relic, sentry, lymph-top)
+We haven't tried lymph's `subscribe` command. It is being left as an excercise
+to the reader.
+
+Testing services is crucial to development. Have a look at our services`
+[`tests`](tests.py) to get an idea of lymph testing utilities.
+
+There's an API to deal with configuration files. It allows nested lookups,
+class instantiation etc. This gives you the freedom to configure services
+with a minial amount of code. Custom configuration can be process by overriding
+lymph interface's `apply_config(self, config)` hook.
+
+If a service requires special start and stop logic both the `on_start` and
+`on_stop` can be overridden.
+
+Classic RPC calls block until the response is received. A deferred RPC call
+mechanism is implemented in case you wish to consume the RPC response later, or
+simply ingore it. Lymph's RPC implementation allows to defer calls:
+
+```python
+`proxy('Greeting').greet.defer(name=u'John')  # non-blocking
+```
+
+Standard process metrics are being collected out of the box and exposed via an
+internal API. It is possible to collect and expose custom metrics.
+
+Lymph has a plugin system which allows one to register code for certain hooks,
+e.g.  `on\_error`, `on\_http\_request`, `on\_interface\_installation` etc. Both
+a [New
+Relic](https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/newrelic.py)
+and a
+[Sentry](https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/sentry.py)
+plugin are shipped as built-in. You can also register your own hooks.
+
+Lastly, CLIs are pluggable as well. Have a look at [`lymph
+top`](https://github.com/mouadino/lymph-top) as an example.
 
 ### Lymph under the hood
 
-How does lymph do things under the hood?
+How does lymph do things under the hood? It's quite simple really.
 
-* greenlets
-* rpc via 0mq
-* events via rabbitmq (pluggable)
-* registry via zk (pluggable)
-* http with werkzeug
-* testing
+Lymph depends on Zookeeper as service registry. Once a service instance is
+being started it registers itself with Zookeper providing its address and name.
+If it is stopped it unregisters itself. When you send a request to another
+service, lymph gets all instance's addresses and routes the request. That
+means, lymph does client-side load balancing. The request itself is being
+serialized with [msgpack](http://msgpack.org/) and send over the wire using
+[zeromq](http://zeromq.org/).
 
-### Lymph compared to other "frameworks"
-Nameko
-* (http://lucumr.pocoo.org/2015/4/8/microservices-with-nameko/)
-* tech
-* running
-* testing
-* only rabbitmq, no zk
+The pub-sub event system is powered by [RabbitMQ](https://www.rabbitmq.com/).
+That means any valid topic exchange routing key is valid lymph event type. Lymph
+also allows to broadcast events.
 
-zerorpc, cocaine, spread, crossbar, circuits, iPOPO, ...
+Every service instance is a single Python process which handles requests and
+events via of greenlets. Lymph uses [gevent](http://www.gevent.org/) for this.
+
+Lymph uses [werkzeug](http://werkzeug.pocoo.org/) to handle everything WSGI and
+HTTP.
+
+### Similar tech
+
+As of now it seems as if both nameko and lymph are the only service frameworks
+that exist for Python. This is true for the level of integration and
+self-contained tooling at least. Obviously, they are different frameworks by
+different authors and having been implemented independently. Nonetheless, they
+do share some striking characteritics. To us, these similarities validate our
+assumptions. It is worth mentioning that nameko doesn't do service registry
+explicitly though. Nameko achieves this by using RabbitMQ for both events and
+RPC. It'd be tedious to compare in detail.
+
+Most other similar technologies aren't either Python-specific or provide
+specific solutions for RPC for instance like [zerorpc](http://www.zerorpc.io/).
+
+Things that are worth mentioning though are
+[cocaine](https://cocaine.readthedocs.org/en/latest/),
+[spread](http://www.spread.org/index.html),
+[circuits](http://circuitsframework.com/), ...
 
 ### Future
-* eco system (storage, storeproxy, flow etc)
-* distconfig
+
+We intend to grow a little ecosystem around lymph. While lymph will stay the
+core framework, we're already in the process of developing complementary
+libraries for writing special-purpose services, e.g. for storage and business
+process. Naturally, we'll open-source them once they have matured well enough.
+
+Lastly, we'd like to mention
+[distconfig](https://github.com/deliveryhero/distconfig) which a Python library
+for managing shared state, i.e. configuration, feature switches etc. Distconfig
+complements lymph quite well.
 
 ### Summary & outro
 * did we accomplish? circle back to claim and title
