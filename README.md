@@ -1,4 +1,4 @@
-# Stop trying to glue your services together`; import lymph`
+# `import lymph`
 
 Welcome to the materials and the transcript of an introduction to
 [lymph](http://lymph.io). Lymph is a framework for writing services in Python.

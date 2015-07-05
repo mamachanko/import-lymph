@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars:
-    basedir: ~/lymph-talk
+    basedir: "~/import-lymph"
     venv: "{{ basedir }}/venv"
 
   pre_tasks:
@@ -57,6 +57,10 @@
       pip: name=virtualenv
            state=present
 
+    - name: Venv is absent
+      file: dest={{ venv }}
+            state=absent
+
     - name: Venv is present
       command: virtualenv {{ venv }}
  
@@ -94,7 +98,7 @@
         - 'export EDITOR=vim'
         - 'export LC_ALL="en_US.UTF-8"'
         - 'export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin' # this is bad. help me :(
-        - 'cd ~/lymph-talk'
+        - 'cd {{ basedir }}'
 
   handlers:
     - name: Restart zookeeper

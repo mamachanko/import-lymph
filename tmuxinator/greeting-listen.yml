@@ -1,5 +1,5 @@
 name: greeting-listen
-root: ~/lymph-talk
+root: ~/import-lymph
 pre_window: . venv/bin/activate && source ./env && clear
 
 windows:
