@@ -178,9 +178,21 @@ So what tooling is available? `lymph list` will tell us.
 
 ``` shell
 » lymph list
+node       Run a node service that manages a group of processes on the same machine.
+shell      Open an interactive Python shell locally or remotely.
+help       Display help information about lymph.
+instance   Run a single service instance (one process).
+list       List available commands.
+inspect    Describes the RPC interface of a service
+request    Send a request message to some service and output the reply.
+discover   Show available services.
+subscribe  Prints events to stdout.
+tail       Stream the logs of one or more services.
+emit       Manually emits an event.
 ```
 
-You see there's plenty of commands available to interact with services.
+You see there's plenty of commands available to interact with services. Worry
+not, we'll explore them one by one.
 
 To begin with let's assert that an instance of the echo service is running.
 We'll use lymph's `discover` command.
