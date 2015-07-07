@@ -1,29 +1,19 @@
 
-   "                                  m           ""#                         #     
- mmm    mmmmm  mmmm    mmm    m mm  mm#mm           #    m   m  mmmmm  mmmm   # mm  
-   #    # # #  #" "#  #" "#   #"  "   #             #    "m m"  # # #  #" "#  #"  # 
-   #    # # #  #   #  #   #   #       #             #     #m#   # # #  #   #  #   # 
- mm#mm  # # #  ##m#"  "#m#"   #       "mm           "mm   "#    # # #  ##m#"  #   # 
-               #                                          m"           #            
-               "                                         ""            "            
+ ▗              ▐   ▜           ▌  
+ ▄ ▛▚▀▖▛▀▖▞▀▖▙▀▖▜▀  ▐ ▌ ▌▛▚▀▖▛▀▖▛▀▖
+ ▐ ▌▐ ▌▙▄▘▌ ▌▌  ▐ ▖ ▐ ▚▄▌▌▐ ▌▙▄▘▌ ▌
+ ▀▘▘▝ ▘▌  ▝▀ ▘   ▀   ▘▗▄▘▘▝ ▘▌  ▘ ▘
 
 Welcome to the lymph demo playground.
 
 You can play around with lymph demo services and explore the tooling. There are
-prepared tmux sessions. To get started, list the available sessions:
+prepared tmuxinator sessions for you:
 
   $ mux list
 
 Choose one of them and start it, e.g.:
 
   $ mux start all
-
-(tmux' prefix is changed to be C-w. You move between panes like in vim.)
-
-You will find yourself inside a tmux session with panes set up and services
-running. If in doubt, run:
-
-  $ lymph list
 
 Middleware:
   Zookeeper is running at zk:2181
