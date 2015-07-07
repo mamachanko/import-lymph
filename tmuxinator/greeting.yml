@@ -4,10 +4,10 @@ pre_window: . venv/bin/activate && source ./env && clear
 
 windows:
     - lymph:
-        layout: main-vertical
+        layout: even-horizontal
         panes:
             - client:
-                - toilet client
+                - toilet -f smblock Client
             - greeting:
-                - toilet greeting
-                - lymph instance --config=conf/greeting.yml --reload
+                - toilet -f smblock Greeting
+                - lymph instance --config=conf/greeting.yml

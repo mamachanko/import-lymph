@@ -4,16 +4,16 @@ pre_window: . venv/bin/activate && source ./env && clear
 
 windows:
     - lymph:
-        layout: main-vertical
+        layout: e6c7,119x30,0,0{60x30,0,0,0,58x30,61,0[58x9,61,0,1,58x9,61,10,2,58x10,61,20,3]}
         panes:
             - client:
-                - toilet client
+                - toilet -f smblock Client
             - web:
-                - toilet web
+                - toilet -f smblock Web
                 - lymph instance --config=conf/web.yml --reload
             - greeting:
-                - toilet greeting
+                - toilet -f smblock Greeting
                 - lymph instance --config=conf/greeting.yml --reload
             - listen:
-                - toilet listen
+                - toilet -f smblock Listen
                 - lymph instance --config=conf/listen.yml --reload
