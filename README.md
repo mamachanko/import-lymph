@@ -36,7 +36,7 @@ Let's start then!
 ## Stop trying to glue your services together, `import lymph`
 > An introduction to lymph by Alejandro Castillo & Max Brauer
 
-We'd like to introduce you to [lymph](http://lymph.io), a framework for
+We'd like to introduce you to _lymph_, a framework for
 writing services in Python. With lymph you can write services with almost no
 boilerplate. But let's introduce ourselves first.
 
@@ -95,27 +95,42 @@ Another aspect is our heterogenic product landscape. While most countries'
 websites work the same("order food online") they all differ one way or another.
 Modularity, extensibility, reuseability, scaleability... are key for us.
 
-Still, the first thing you would think is _"why write another
-framework?"_. The answer is that when we looked around we did not find
-anything that would fit our needs. We wanted to work with services but we
-wanted some very specific things(@TODO what are these?). We are mainly
-Python-powered so we wanted to stay inside Python as much as possible. We
-wanted to abstract away all the problems one is dealing with when doing
-services. That is, developers are not supposed to worry about transporting
-data, registering services, discovering them etc. We wanted to enable our
-developers to work with services in a simple and easy way: as little
-boilerplate as possible, no details that don't relate to bussiness logic.
+Still, the obvious question is: _"why write another framework?"_. The answer is
+almost as obvious. At that time there was nothing that fit our needs. We wanted
+to work with services but we wanted some very specific things:
 
-We're ging to talk about similar technoglogies later.
+* We are mainly Python-powered and we wanted to continue rolling with it.
+  Language-agnosticity is great, but not really important for us(yet).
+* Running and testing services should be easy.
+* Developers shouldn't have to worry about registering and discovering services.
+* You don't have to serialize data for sending it over the wire. Neither do you
+  want to manually deserialize it.
+* Requesting remote services should be almost like in-process calls.
+* Developers shouldn't have to deal with event loops nor know about any
+  transport mechanism.
+* Configuring services should be straightforward and flexible.
+* Scaling should be easy, but transparent to clients.
+* Services should speak HTTP.
+* We don't want boilerplate if it can be avoided.
 
-But finally, say hello to [lymph](http://lymph.io). By now, hopefully, you're
-itching to see how a service looks in lymph. Spoiler alert: very much like in
-nameko.
+To sum things up, we wanted as little in the way as possible between
+developers and functionality they want to serve.
 
-We'll break the ice by demoing running and playing around with services. We'll
-slowly progress through lymph's features, service by service.
+You might say _"hey, use [nameko](https://nameko.readthedocs.org)"_. But nameko
+has not come to our attention until few months ago. Neither was it mature
+enough to be adopted way back then. Later we're going to talk technologies
+similar to nameko and lymph.
 
-### Demo
+Taking all these things into consideration, rolling our own thing was actually
+reasonable. And to not suspend any further, say hello to
+[lymph](http://lymph.io). Hopefully, you're itching to see what a service looks
+like in lymph. If you know nameko you won't be surprised though.
+
+We'll break the ice by running and playing around with services. We'll slowly
+progress through lymph's features, service by service. This is a good time to
+boot the vagrant box.
+
+### Hands-on
 
 #### The greeting service
 
