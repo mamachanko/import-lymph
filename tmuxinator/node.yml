@@ -4,14 +4,14 @@ pre_window: . venv/bin/activate && source ./env && clear
 
 windows:
     - lymph:
-        layout: main-vertical
+        layout: cee1,104x27,0,0{52x27,0,0,0,51x27,53,0[51x12,53,0,1,51x14,53,13,2]}
         panes:
             - client:
-                - toilet client
+                - toilet -f smblock client
             - node:
-                - toilet node
+                - toilet -f smblock node
                 - lymph node
             - tail:
                 - sleep 1
-                - toilet tail
+                - toilet -f smblock tail
                 - lymph tail Web Greeting Listen
