@@ -475,14 +475,14 @@ mechanism is implemented in case you wish to consume the RPC response later, or
 simply ingore it. Lymph's RPC implementation allows to defer calls:
 
 ```python
-`proxy('Greeting').greet.defer(name=u'John')  # non-blocking
+proxy('Greeting').greet.defer(name=u'John')  # non-blocking
 ```
 
 Standard process metrics are being collected out of the box and exposed via an
 internal API. It is possible to collect and expose custom metrics.
 
 Lymph has a plugin system which allows one to register code for certain hooks,
-e.g.  `on\_error`, `on\_http\_request`, `on\_interface\_installation` etc. Both
+e.g.  `on_error`, `on_http_request`, `on_interface_installation` etc. Both
 a [New
 Relic](https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/newrelic.py)
 and a
