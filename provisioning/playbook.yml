@@ -98,6 +98,7 @@
         - 'export EDITOR=vim'
         - 'export LC_ALL="en_US.UTF-8"'
         - 'export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin' # this is bad. help me :(
+        - 'export PS1=\"\\w\\$ \"'
         - 'cd {{ basedir }}'
 
   handlers:
