@@ -87,7 +87,7 @@ that we'd consider ourselves succesful.
 
 Our initial situation was the classic one. We had a massive Django monolith.
 We weren't moving fast at all. We've had trouble finding rhythm for a growing
-number of teams and developers. Teams we're blocked by other teams. The code
+number of teams and developers. Teams were blocked by other teams. The code
 base was a big bowl of legacy spaghetti. We've had issues scaling.
 
 Basically, what comes to mind is the textbook situation: "my monolith hurts, i
@@ -99,7 +99,7 @@ websites work the same("order food online") they all differ one way or another.
 Modularity, extensibility, reuseability, scaleability... are key for us.
 
 Still, the obvious question is: _"why write another framework?"_. The answer is
-almost as obvious. At that time there was nothing that fit our needs. We wanted
+almost as obvious. At that time there was nothing that fits our needs. We wanted
 to work with services but we wanted some very specific things:
 
 * We are mainly Python-powered and we wanted to continue rolling with it.
@@ -172,7 +172,7 @@ left-hand side you see a plain shell on which we'll explore lymph's tooling.
 Every time you want to run an instance of a servcie you need to point lymph to
 its configuration. The configuration tells lymph about the interface's name and
 where it can import it from. Since lymph imports the interface, its modulea
-needs to be on the `PYTHONPATH`. Why can make this happen with `export
+needs to be on the `PYTHONPATH`. We can make this happen with `export
 PYTHONPATH=services` in our example. But worry not, the tmuxinator sessions
 take care of it for you. Our service's configuration looks like
 [this](conf/greeting.yml):
@@ -271,7 +271,7 @@ We should find them registered correctly.
 
 ``` shell
 » lymph discover
-Greeting [1]
+Greeting [2]
 Listen [1]
 ```
 
@@ -334,8 +334,8 @@ class Web(WebServiceInterface):
 ```
 
 The greet handler expects a name to be present in the query string. It calls
-the greeting service via the `self.proxy` and returns the result in the
-response. And it prints.
+the greeting service via the `self.proxy`, returns the result in the
+response and it prints.
 
 Mind, that we're not validating the request method nor anything else.
 
@@ -462,12 +462,12 @@ That mostly covers the tooling we have for lymph services.
 We haven't tried lymph's `subscribe` command. It is being left as an excercise
 to the reader.
 
-Testing services is crucial to development. Have a look at our services`
+Testing services is crucial to development. Have a look at our services
 [`tests`](tests.py) to get an idea of lymph testing utilities.
 
 There's an API to deal with configuration files. It allows nested lookups,
 class instantiation etc. This gives you the freedom to configure services
-with a minial amount of code. Custom configuration can be process by overriding
+with a minial amount of code. Custom configuration can be processed by overriding
 lymph interface's `apply_config(self, config)` hook.
 
 If a service requires special start and stop logic both the `on_start` and
