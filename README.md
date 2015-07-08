@@ -282,7 +282,7 @@ service listens to it. We'll use lymph's `emit` command. We're expecting the
 listen service to print the name field from the event body.
 
 ```
-» lymph emit echo '{"greeted": "Joe"}'
+» lymph emit greeted '{"name": "Joe"}'
 ```
 
 Nice. That worked.
