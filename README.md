@@ -271,7 +271,7 @@ We should find them registered correctly.
 
 ``` shell
 » lymph discover
-Greeting [1]
+Greeting [2]
 Listen [1]
 ```
 
