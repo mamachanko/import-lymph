@@ -470,7 +470,7 @@ header. If you check the logs within the tail pane you should see that all logs
 can be correlated with that trace id. And indeed we see the same `trace_id`
 across our service instances for every incoming request:
 
-<img align="left" src="images/tail_traceid.png" width="98%">
+<img src="images/tail.png" width="98%">
 
 We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
