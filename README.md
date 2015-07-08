@@ -36,7 +36,7 @@ follow all the examples shown in this introduction.
 
 Let's start then!
 
-## Stop trying to glue your services together, `import lymph`
+## Stop trying to glue your services together
 > An introduction to lymph by Alejandro Castillo & Max Brauer
 
 We'd like to introduce you to _lymph_, a framework for
