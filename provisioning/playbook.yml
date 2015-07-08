@@ -23,6 +23,12 @@
         - python-dev
         - python-pip
 
+    - name: Restart zookeeper
+      become: yes
+      service: name=zookeeper
+               state=started
+               enabled=yes
+
     - name: Hosts are present
       become: yes
       lineinfile: dest=/etc/hosts
@@ -100,10 +106,3 @@
         - 'export PATH=$PATH:/home/vagrant/.gem/ruby/2.1.0/gems/tmuxinator-0.6.11/bin' # this is bad. help me :(
         - 'export PS1=\"\\w\\$ \"'
         - 'cd {{ basedir }}'
-
-  handlers:
-    - name: Restart zookeeper
-      become: yes
-      service: name=zookeeper
-               state=started
-               enabled=yes
