@@ -28,8 +28,11 @@ vagrant up && vagrant ssh
 You will be prompted for your root password half-way through `vagrant up`
 because we use NFS to share files.
 
-Once inside the box, the `motd` contains more information. But basically you
-can directly follow all the examples in this introduction.
+Once inside the box, the `motd` contains more information. You can directly
+follow all the examples shown in this introduction.
+
+<img align="left" src="images/motd.png" width="49%">
+<img align="right" src="images/mux.png" width="49%">
 
 Let's start then!
 
