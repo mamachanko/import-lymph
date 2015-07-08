@@ -291,7 +291,7 @@ When we do RPCs now we expect the greeting instances to respond in round-robin
 fashion while the listen instance should rect to all occuring events.
 
 ``` shell
-» lymph request Greeting.greet '{"name": "Joe"}'                                │
+» lymph request Greeting.greet '{"name": "Joe"}'
 u'Hi, Joe!'
 ```
 (do this repeatedly, until both greeting instances have responded)
@@ -367,24 +367,26 @@ listening at the default port 4080. We're using `httpie` to excercise the
 request:
 
 ```
-» http localhost:4080/greet?name=joe
+» http localhost:4080/greet?name=Joe
 HTTP/1.1 200 OK
 Content-Length: 8
 Content-Type: text/plain; charset=utf-8
-Date: Fri, 03 Jul 2015 13:55:29 GMT
+Date: Wed, 08 Jul 2015 20:51:30 GMT
+X-Trace-Id: 3adc102707f745239efb2837c1877f59
 
-Hi, joe!
+Hi, Joe!
+
 ```
 
 The response looks good and all services should have performed accordingly.
 
 #### Lymph's development server
 
-Yet, when developing locally you seldomly would want to run all of your
-services within different shell or tmux panes. Lymph has its own development
-server which wraps around any number of services with any number of instances
-each. Therefore, we'll have to configure which services to run and how many
-instances of each in the [`.lymph.yml`](.lymph.yml):
+Yet, when developing locally you seldomly want to run all of your services
+within different shells or tmux panes. Lymph has its own development server
+which wraps around any number of services with any number of instances.
+Therefore, we'll have to configure which services to run and with how many
+instances in [`.lymph.yml`](.lymph.yml):
 
 ```yaml
 instances:
@@ -406,8 +408,8 @@ sockets:
         port: 4080
 ```
 
-(Since we run several instances of our web service we have to configure shared
-sockets.)
+(Since we run several instances of our web service we have to configure a
+shared sockets for it.)
 
 Mind that in our case `command` specifies lymph instances but this could also
 be any other service you need, e.g. Redis.
@@ -434,41 +436,59 @@ That's a good number. Once we feed a request into the cluster we should see
 print statements and logs appearing.
 
 ``` shell
-» http localhost:4080/greet?name=joe
+» http localhost:4080/greet?name=Joe
 HTTP/1.1 200 OK
 Content-Length: 8
 Content-Type: text/plain; charset=utf-8
-Date: Fri, 03 Jul 2015 13:55:29 GMT
+Date: Wed, 08 Jul 2015 20:51:30 GMT
+X-Trace-Id: 3adc102707f745239efb2837c1877f59
 
-Hi, joe!
+Hi, Joe!
+
 ```
 
-There's a lot going on in the tail pane. You would find an even bigger mess the more
-services and instances you run and the more intricated your patterns of
-communication become. Sometimes you wonder "where did my request go?". Lymph
-helps you though with `trace\_id`s. Every request that appears in our cluster
-which doesn't have a trace id assigned gets one. These trace ids get fowarded
-via every RPC and event.
+Within the `node` pane we should the see following haiku-esque sequence of print
+statements:
 
-So we should be able to corellate all actions in cluster to the one incoming
-HTTP request. If you check the logs within the tail pane you should see that
-all logs can be related with the `trace\_id`. And indeed we see the same
-`trace\_id` across our service instances for every incoming request.
+```shell
+» lymph node
+About to greet Joe
+Saying hi to Joe
+Somebody greeted Joe
+```
 
-That mostly covers the tooling we have for lymph services.
+Within the `tail` pane though, there's a lot going on. You would find an even
+bigger mess the more services and instances you run and the more intricated
+your patterns of communication become. Sometimes you wonder "where did my
+request go?". Lymph helps you though with `trace_id`s. Every request that
+appears in our cluster which doesn't have a _trace id_ assigned yet gets one.
+Trace ids get fowarded with every RPC and event.
+
+We are able to corellate all log statements in our cluster to that one HTTP
+request. In fact the web service returns the the trace id in the `X-Trace-Id`
+header. If you check the logs within the tail pane you should see that all logs
+can be correlated with that trace id. And indeed we see the same `trace_id`
+across our service instances for every incoming request:
+
+<img align="left" src="images/tail_traceid.png" width="98%">
+
+We've covered most of the available tooling. You should have a pretty good idea
+how to interact with your services now.
 
 ### Further features
 
-We haven't tried lymph's `subscribe` command. It is being left as an excercise
-to the reader.
+There's one command we haven't tried yet. That's `lymph subscribe`. It is being
+left to the reader as an excercise.
 
-Testing services is crucial to development. Have a look at our services
-[`tests`](tests.py) to get an idea of lymph testing utilities.
+Let's talk about features which go beyond CLI tooling. Testing services is
+crucial to development. Have a look at our services [`tests`](tests.py) to get
+an idea of lymph testing utilities.
 
-There's an API to deal with configuration files. It allows nested lookups,
-class instantiation etc. This gives you the freedom to configure services
-with a minial amount of code. Custom configuration can be processed by overriding
-lymph interface's `apply_config(self, config)` hook.
+Earlier we have mentioned that easo of configuration was a concern when lymph
+was designed. There's an API to deal with YAML configuration files. It allows nested
+lookups, class instantiation etc. This gives you the freedom to configure
+services with a minial amount of code. Custom configuration can be processed by
+overriding lymph interface's `apply_config(self, config)` hook.
 
 If a service requires special start and stop logic both the `on_start` and
 `on_stop` can be overridden.
