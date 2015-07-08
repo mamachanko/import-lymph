@@ -1,19 +1,25 @@
 # `import lymph`
 
-Welcome to an an introduction to [lymph](http://lymph.io). Lymph is a framework
+Welcome to an introduction to [lymph](http://lymph.io). Lymph is a framework
 for writing services in Python.
 
-## Playground setup
+## Playground
 
 We've got a [vagrant](http://vagrantup.com) box for you with lymph services
-inside. We suggest you use it, but local setup should be straightfoward as
-well.
+running inside. We suggest you use it, but local setup should be straightfoward
+as well.
 
 The box provisions with all tooling and code ready for your perusal. It has
 both [Zookeeper](http://zookeeper.apache.org/) and
 [RabbitMQ](https://www.rabbitmq.com/) running inside. Services and lymph's
-tooling can be explored within tmuxinator projects. Getting inside the box is a
-matter of running:
+tooling can be explored within pre-configured tmux sessions.
+
+The only prerequisits are
+[vagrant](http://docs.vagrantup.com/v2/installation/index.html) and
+[ansible](http://docs.ansible.com/intro_installation.html) on your host
+machine.
+
+Getting hands-on is a matter of running:
 
 ```shell
 vagrant up && vagrant ssh
@@ -22,103 +28,109 @@ vagrant up && vagrant ssh
 You will be prompted for your root password half-way through `vagrant up`
 because we use NFS to share files.
 
-Once inside the box, the `motd` contains more information on what's available.
+Once inside the box, the `motd` contains more information. But basically you
+can directly follow all the examples in this introduction.
 
-## The talk
+Let's start then!
+
+## Stop trying to glue your services together, `import lymph`
 > An introduction to lymph by Alejandro Castillo & Max Brauer
 
-### Opening
-
-Hello, we'd like to introduce you to [lymph](http://lymph.io) a framework for
+We'd like to introduce you to _lymph_, a framework for
 writing services in Python. With lymph you can write services with almost no
-boilerplate. But let we should introduce ourselves first.
+boilerplate. But let's introduce ourselves first.
 
 We're [Delivery Hero](http://deliveryhero.com), a holding of online
 food-ordering services. We're located in Berlin. We operate in 34 countries
 and growing.
 
 Let me explain the concept of online food-ordering to those who're unfamiliar
-with it. However, I doubt this is news to anyone, The concept is simple:
+with it. However, I seriously doubt this is news to anyone. The concept is
+simple:
 * get hungry
 * go online
-* search for restaurants close to you
+* search for restaurants
 * compile your order
 * pay online
-* wait for the delivery
-Basically, it's e-commerce with very grumpy customers. Nonetheless, the
-restaurant integration, e.g. order transmission, fulfillment, delivery, etc.
-offer quite an ecosystem of things to tackle.
+* wait for delivery
+Basically, it's e-commerce with very grumpy customers.
 
-What are we going to talk about? Let's briefly go over the flow of our talk:
+How's this introduce structured? Let's briefly go over the flow of of topics:
 1. We're going to explain where we're coming from and why we have given birth
    to a(nother) framework
 1. We'll look at code as fast possible
-1. We'll run services and increasingly add new services to explore communication
-   patterns and the tooling of lymph
-1. We'll briefly talk about how lymoh does things under the hood
-1. We'll touch on similar technology and how it relates to lymph (Nameko in
+1. We'll run services and progresseivly add new services to explore
+   forms of communication and the tooling of lymph
+1. We'll give you a brief overview of further features and talk about how lymph
+   does things under the hood
+1. We'll touch on similar technology and see how it relates to lymph (Nameko in
    particular)
 1. We'll talk future plans for lymph and its ecosystem
 1. That's it :)
 
-For the sake of this talk we assume that you're familiar with the concept of
-services. We assume that you are familiar with what a monolith is. We assume
-that you are familiar with when and why to use either and even more so when
-not. We will not discuss the differences between monoliths and services. We
-won't talk about how services might safe your development or your business.
-Neither will we talk about sophisticated networking topologies.
+Before we go ahead, here's a little disclaimer. For the sake of this
+introduction, we assume that you're familiar with the concept of services. We
+assume you're familiar with monoliths. We assume that you are familiar with
+when and why to use either and even more so when not. We will not discuss the
+differences between the two. We won't talk about how services might safe your
+development teams or your business. Neither will we talk about sophisticated
+networking topologies, Docker, "microservices", ...
 
 But what we're going to talk about is lymph. By the end of the talk you should
-understand what lymph can and cannot do and why that's cool. If you achieved
-that we consider ourselves succesful.
+understand what lymph can and cannot do and why that's cool. If we achieved
+that we'd consider ourselves succesful.
 
-You can find all material and a transcript of this talk
-[online](http://mamachanko.github.io/lymph-talk).
-
-If you speak Spanish then you may also want to attend [this very
-talk](https://ep2015.europython.eu/conference/talks/deja-de-pegarte-con-tus-servicios-import-lymph)
-in Spanish later this week by Castillo.
-
-If you happen to attend the PyCon France, we'll be ther too.
-
-Also, you can find us at our sponsor table in the foyer. We've brought goodies
-and gummi bears.
-
-(repeat all this in the end)
-
-### Motivation
+### Why write a framework?
 
 Our initial situation was the classic one. We had a massive Django monolith.
 We weren't moving fast at all. We've had trouble finding rhythm for a growing
-number of teams and developers. People we're blocked by other people. The code
-base was a big bowl of legacy spaghetti. We've had issues scaling. You should
-think of the textbook situation "my monolith hurts, i want services". So, the
-idea of a more service-oriented architecture became increasingly reasonable to
-us.  Another dimension is our heterogenic product landscape. While most
-countries websites work the same they always differ in some aspects. Modularity
-was key for us.
+number of teams and developers. Teams we're blocked by other teams. The code
+base was a big bowl of legacy spaghetti. We've had issues scaling.
 
-The first thing some of you would think is 'why write another
-framework?'. The answer is that when we looked around we did not find
-anything that would fit our needs. We wanted to work with services but we
-wanted some very specific things(@TODO what are these?). We are mainly
-Python-powered so we wanted to stay inside Python as much as possible. We
-wanted to abstract away all the problems one is dealing with when doing
-services. That is, developers are not supposed to worry about transporting
-data, registering services, discovering them etc. We wanted to enable our
-developers to work with services in a simple and easy way: as little
-boilerplate as possible, no details that don't relate to bussiness logic.
+Basically, what comes to mind is the textbook situation: "my monolith hurts, i
+want services". The idea of a service-oriented architecture became increasingly
+reasonable and attractive to us.
 
-We're ging to talk about similar technoglogies later.
+Another aspect is our heterogenic product landscape. While most countries'
+websites work the same("order food online") they all differ one way or another.
+Modularity, extensibility, reuseability, scaleability... are key for us.
 
-But finally, say hello to [lymph](http://lymph.io). By now, hopefully, you're
-itching to see how a service looks in lymph. Spoiler alert: very much like in
-nameko.
+Still, the obvious question is: _"why write another framework?"_. The answer is
+almost as obvious. At that time there was nothing that fit our needs. We wanted
+to work with services but we wanted some very specific things:
 
-We'll break the ice by demoing running and playing around with services. We'll
-slowly progress through lymph's features, service by service.
+* We are mainly Python-powered and we wanted to continue rolling with it.
+  Language-agnosticity is great, but not really important for us(yet).
+* Running and testing services should be easy.
+* Developers shouldn't have to worry about registering and discovering services.
+* You don't have to serialize data for sending it over the wire. Neither do you
+  want to manually deserialize it.
+* Requesting remote services should be almost like in-process calls.
+* Developers shouldn't have to deal with event loops nor know about any
+  transport mechanism.
+* Configuring services should be straightforward and flexible.
+* Scaling should be easy, but transparent to clients.
+* Services should speak HTTP.
+* We don't want boilerplate if it can be avoided.
 
-### Demo
+To sum things up, we wanted as little in the way as possible between
+developers and functionality they want to serve.
+
+You might say _"hey, use [nameko](https://nameko.readthedocs.org)"_. But nameko
+has not come to our attention until few months ago. Neither was it mature
+enough to be adopted way back then. Later we're going to talk technologies
+similar to nameko and lymph.
+
+Taking all these things into consideration, rolling our own thing was actually
+reasonable. And to not suspend any further, say hello to
+[lymph](http://lymph.io). Hopefully, you're itching to see what a service looks
+like in lymph. If you know nameko you won't be surprised though.
+
+We'll break the ice by running and playing around with services. We'll slowly
+progress through lymph's features, service by service. This is a good time to
+boot the vagrant box.
+
+### Hands-on
 
 #### The greeting service
 
@@ -463,14 +475,14 @@ mechanism is implemented in case you wish to consume the RPC response later, or
 simply ingore it. Lymph's RPC implementation allows to defer calls:
 
 ```python
-`proxy('Greeting').greet.defer(name=u'John')  # non-blocking
+proxy('Greeting').greet.defer(name=u'John')  # non-blocking
 ```
 
 Standard process metrics are being collected out of the box and exposed via an
 internal API. It is possible to collect and expose custom metrics.
 
 Lymph has a plugin system which allows one to register code for certain hooks,
-e.g.  `on\_error`, `on\_http\_request`, `on\_interface\_installation` etc. Both
+e.g.  `on_error`, `on_http_request`, `on_interface_installation` etc. Both
 a [New
 Relic](https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/newrelic.py)
 and a
