@@ -1,0 +1,9 @@
+interfaces:
+    Service:
+        class: service:Service
+
+        cache_client:
+            class: redis.client:StrictRedis
+            host: redis
+            port: 6379
+            db: 1
