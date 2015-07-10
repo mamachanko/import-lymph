@@ -1,0 +1,9 @@
+interfaces:
+    Service:
+        class: service:Service
+
+        cache_client:
+            class: pymemcache.client:Client
+            server:
+              - memcache
+              - 11211

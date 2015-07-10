@@ -62,7 +62,7 @@ How's this introduce structured? Let's briefly go over the flow of of topics:
 1. We're going to explain where we're coming from and why we have given birth
    to a(nother) framework
 1. We'll look at code as fast possible
-1. We'll run services and progresseivly add new services to explore
+1. We'll run services and progressively add new services to explore
    forms of communication and the tooling of lymph
 1. We'll give you a brief overview of further features and talk about how lymph
    does things under the hood
@@ -420,7 +420,7 @@ Let's bring them all up.
 » mux start all
 ```
 
-Once more, we find ourselves inside a tmux session with lymph node running in
+Once more, we find ourselves inside a tmux session with `lymph node` running in
 the top-right pane. Below that you see `lymph tail` running which allows us to
 follow the logs of any number of services. But first, let's check how many
 instances are running:
@@ -475,61 +475,166 @@ across our service instances for every incoming request:
 We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
 
-### Further features
-
 There's one command we haven't tried yet. That's `lymph subscribe`. It is being
 left to the reader as an excercise.
 
+### More built-in features
+
+#### Testing
+
 Let's talk about features which go beyond CLI tooling. Testing services is
-crucial to development. Have a look at our services [`tests`](tests.py) to get
-an idea of lymph testing utilities.
+crucial for development. Have a look at our services [`tests`](tests.py) to get
+an idea of lymph testing utilities. The tests showcase how you would tests
+these three varieties of services. You can run the tests with:
 
-Earlier we have mentioned that easo of configuration was a concern when lymph
-was designed. There's an API to deal with YAML configuration files. It allows nested
-lookups, class instantiation etc. This gives you the freedom to configure
-services with a minial amount of code. Custom configuration can be processed by
-overriding lymph interface's `apply_config(self, config)` hook.
+```shell
+PYTHONPATH=services nosetests --with-lymph
+```
 
-If a service requires special start and stop logic both the `on_start` and
-`on_stop` can be overridden.
+#### Configuration
+
+Earlier, we have mentioned that ease of configuration was a concern for lymph.
+There's an API to deal configuration files. Its thin abstraction over the
+actual YAML files but gives you the freedom to instantiate classes right from
+the config. This gives you the freedom to configure services with a minial
+amount of code. Custom configuration can be processed by overriding lymph
+interface's `apply_config(self, config)` hook.
+
+Let's say your `Service` is supposed have a `cache_client`. This client should
+be fully configurable and the ramifications of instantiating should not be the
+service's concern. We could configure our service to run with a redis like so:
+
+(for this we assume that both `redis` and `memcache` are set in your
+`/etc/hosts` to point to the respective IPs. that'd be `127.0.0.1` in most
+cases. but `redis` and `memcache` read nicer.)
+
+```yaml
+# conf/service_redis.yaml
+interfaces:
+    Service:
+        class: service:Service
+
+        cache_client:
+            class: redis.client:StrictRedis
+            host: redis
+            port: 6379
+            db: 1
+```
+
+As you can see the config contains all information we need to instantiate the
+redis client's class. Let's make use of the config API then and configure
+our service in the `apply_config(self, config)` hook:
+
+```python
+# service/service.py
+import lymph 
+
+
+class Service(lymph.Interface):
+
+    def apply_config(self, config):
+        super(Service, self).apply_config(config)
+        self.cache_client = config.get_instance('cache_client')
+```
+
+As you see it takes only one line to configure the service. Running it is a matter
+of pointing to the desired config file:
+
+```shell
+» lymph instance --config=conf/service_redis.yml
+```
+
+We could have other instances running on top of memcache though. Like so:
+
+```yaml
+interfaces:
+    Service:
+        class: service:Service
+
+        cache_client:
+            class: pymemcache.client:Client
+            server:
+              - memcache
+              - 11211
+```
+
+Again, you run it by pointing it to the desired config file:
+
+```shell
+» lymph instance --config=conf/service_memcache.yml
+```
+
+You can also share instance of such classes over instances of your services.
+All service instances [share the same zookeeper client
+instance](https://github.com/deliveryhero/lymph/blob/master/conf/sample-node.yml#L9)
+by default.
+
+#### Up and down
+
+You may want to set the stage when bringing up your service. Performing
+clean-up tasks when shutting down is just as likely. Therefore you may override
+the `on_start(self)` and `on_stop(self)` hooks.  For the `Service` from the
+previous section we could do:
+
+```python
+    def on_start(self):
+        super(Service, self).on_start()
+        print('started with client: %s' % self.cache_client)
+
+    def on_stop(self):
+        print('stopping...')
+        super(Service, self).on_stop()
+```
+
+#### Futures
 
 Classic RPC calls block until the response is received. A deferred RPC call
 mechanism is implemented in case you wish to consume the RPC response later, or
-simply ingore it. Lymph's RPC implementation allows to defer calls:
+simply ignore it. Lymph's RPC implementation allows to defer calls:
 
 ```python
 proxy('Greeting').greet.defer(name=u'John')  # non-blocking
 ```
 
+#### Metrics
+
 Standard process metrics are being collected out of the box and exposed via an
 internal API. It is possible to collect and expose custom metrics.
 
-Lymph has a plugin system which allows one to register code for certain hooks,
-e.g.  `on_error`, `on_http_request`, `on_interface_installation` etc. Both
-a [New
+#### Plugins
+
+Lymph has a plugin system which allows you to register code for certain hooks,
+e.g. `on_error`, `on_http_request`, `on_interface_installation` etc. A [New
 Relic](https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/newrelic.py)
 and a
 [Sentry](https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/sentry.py)
-plugin are shipped as built-in. You can also register your own hooks.
+plugin are shipped as built-ins. You can also register your own hooks.
+
+#### CLI extensions
 
 Lastly, CLIs are pluggable as well. Have a look at [`lymph
 top`](https://github.com/mouadino/lymph-top) as an example.
 
-### Lymph under the hood
+### Under the hood
 
-How does lymph do things under the hood? It's quite simple really.
+How does lymph do things under the hood? It isn't black magic. This section
+actually turned out to be much shorter than expected.
 
-Lymph depends on Zookeeper as service registry. Once a service instance is
-being started it registers itself with Zookeper providing its address and name.
-If it is stopped it unregisters itself. When you send a request to another
-service, lymph gets all instance's addresses and routes the request. That
-means, lymph does client-side load balancing. The request itself is being
-serialized with [msgpack](http://msgpack.org/) and send over the wire using
+Lymph depends on Zookeeper for service registry. Zookeeper is a distributed
+key-value store. Once a service instance is being started it registers itself
+with Zookeper providing its address and name.  Once it's being stopped it
+unregisters itself. When you send a request to another service, lymph gets all
+instances' addresses and routes the request. That means, lymph does client-side
+load balancing. Request
+[round-robin](https://github.com/deliveryhero/lymph/blob/master/lymph/core/rpc.py#L140-155)
+over the instances of a service. The request itself is being serialized with
+[msgpack](http://msgpack.org/) and send over the wire using
 [zeromq](http://zeromq.org/).
 
-The pub-sub event system is powered by [RabbitMQ](https://www.rabbitmq.com/).
-That means any valid topic exchange routing key is valid lymph event type. Lymph
-also allows to broadcast events.
+Lymph's pub-sub event system is powered by
+[RabbitMQ](https://www.rabbitmq.com/).  That means any valid topic exchange
+routing key is valid lymph event type. Lymph also allows to broadcast and delay
+events.
 
 Every service instance is a single Python process which handles requests and
 events via of greenlets. Lymph uses [gevent](http://www.gevent.org/) for this.
@@ -537,16 +642,17 @@ events via of greenlets. Lymph uses [gevent](http://www.gevent.org/) for this.
 Lymph uses [werkzeug](http://werkzeug.pocoo.org/) to handle everything WSGI and
 HTTP.
 
-### Similar tech
+### Related frameworks and tech
 
-As of now it seems as if both nameko and lymph are the only service frameworks
-that exist for Python. This is true for the level of integration and
-self-contained tooling at least. Obviously, they are different frameworks by
-different authors and having been implemented independently. Nonetheless, they
-do share some striking characteritics. To us, these similarities validate our
-assumptions. It is worth mentioning that nameko doesn't do service registry
-explicitly though. Nameko achieves this by using RabbitMQ for both events and
-RPC. It'd be tedious to compare in detail.
+Right now it seems as if both [nameko](https://nameko.readthedocs.org/) and
+lymph are the only Python service frameworks that exist. This is true for the
+level of integration and self-contained tooling at least. Obviously, they are
+different frameworks by different authors having been implemented
+independently. Nonetheless, they do share some striking characteritics. To us,
+these similarities validate our assumptions. It is worth mentioning that nameko
+doesn't do service registry explicitly though. Nameko achieves this by using
+RabbitMQ for both events and RPC. It'd be tedious to compare them both in
+detail but it is highly recommended to have a look at nameko as well.
 
 Most other similar technologies aren't either Python-specific or provide
 specific solutions for RPC for instance like [zerorpc](http://www.zerorpc.io/).
@@ -558,30 +664,24 @@ Things that are worth mentioning though are
 
 ### Future
 
-We intend to grow a little ecosystem around lymph. While lymph will stay the
+We intend to grow the little ecosystem around lymph. While lymph will stay the
 core framework, we're already in the process of developing complementary
 libraries for writing special-purpose services, e.g. for storage and business
 process. Naturally, we'll open-source them once they have matured well enough.
 
 Lastly, we'd like to mention
-[distconfig](https://github.com/deliveryhero/distconfig) which a Python library
-for managing shared state, i.e. configuration, feature switches etc. Distconfig
-complements lymph quite well.
+[distconfig](https://github.com/deliveryhero/distconfig) which is a Python
+library for managing shared state, i.e. configuration, feature switches etc.
+Distconfig is intended to complement lymph.
 
-### Summary & outro
-* did we accomplish? circle back to claim and title
-* lymph.io
-* we accept PRs
-* we're hiring
-* same talk in Spanish
-* PyCon Fr
+### Outroduction
 
-### Q&A
-* why zookeeper for registry?
-* how to scale up web services? (sharing sockets)
- 
-### Nice to have
-* plugins (lymph-top, newrelic, sentry)
-* monitoring
-* serial events & broadcast(websockets)
-* sieve of Erathostenes (Mislav)
+Thank you very much for you attention! We're done. We hope you enjoyed this
+little introduction. If you feel that the ice is broken we'd consider ourselves
+successful. If you should have questions feel free to reach out in our IRC
+channel `#lymph` on _freenode.net_. Naturally, we'd appreciate PRs and issues
+on GitHub.
+
+If you should spot any unclarities or errata within this introduction, you're
+very welcome to point them out at
+[github.com/mamachanko/import-lymph](https://nameko.readthedocs.org/)

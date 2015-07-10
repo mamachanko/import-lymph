@@ -10,8 +10,11 @@ class Web(WebServiceInterface):
     ])
 
     def greet(self, request):
+        """
+        handles:
+            /greet?name=<name>
+        """
         name = request.args['name']
         print('About to greet %s' % name)
-        return Response(
-            self.proxy('Greeting').greet(name=name)
-        )
+        greeting = self.proxy('Greeting').greet(name=name)
+        return Response(greeting)
