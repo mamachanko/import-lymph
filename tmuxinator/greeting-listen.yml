@@ -9,10 +9,10 @@ windows:
             - client:
                 - toilet -f smblock Client
             - greeting1:
-                - toilet -f smblock Greeting1
+                - toilet -f smblock Greeting
                 - lymph instance --config=conf/greeting.yml --reload
             - greeting2:
-                - toilet -f smblock Greeting2
+                - toilet -f smblock Greeting
                 - lymph instance --config=conf/greeting.yml --reload
             - listen:
                 - toilet -f smblock Listen
