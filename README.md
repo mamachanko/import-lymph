@@ -1,3 +1,5 @@
+<img alt="build status" align="right" src="https://travis-ci.org/mamachanko/import-lymph.svg">
+
 # `import lymph`
 
 Welcome to an introduction to [lymph](http://lymph.io). Lymph is a framework

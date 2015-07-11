@@ -1,4 +1,4 @@
-git+https://git@github.com/deliveryhero/lymph@master#egg=lymph
+lymph==0.5.1
 httpie
 nose
 pygments
