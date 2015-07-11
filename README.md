@@ -52,24 +52,24 @@ and growing.
 Let me explain the concept of online food-ordering to those who're unfamiliar
 with it. However, I seriously doubt this is news to anyone. The concept is
 simple:
+
 * get hungry
 * go online
 * search for restaurants
 * compile your order
 * pay online
 * wait for delivery
+
 Basically, it's e-commerce with very grumpy customers.
 
-How's this introduce structured? Let's briefly go over the flow of of topics:
-1. We're going to explain where we're coming from and why we have given birth
-   to a(nother) framework
+How's this introduce structured? Let's briefly go over the topics of this
+introduction:
+
+1. We're going to explain where we're coming from and why we have given birth to a(nother) framework
 1. We'll look at code as fast possible
-1. We'll run services and progressively add new services to explore
-   forms of communication and the tooling of lymph
-1. We'll give you a brief overview of further features and talk about how lymph
-   does things under the hood
-1. We'll touch on similar technology and see how it relates to lymph (Nameko in
-   particular)
+1. We'll run services and progressively add new services to explore forms of communication and the tooling of lymph
+1. We'll give you a brief overview of further features and talk about how lymph does things under the hood
+1. We'll touch on similar technology and see how it relates to lymph (Nameko in particular)
 1. We'll talk future plans for lymph and its ecosystem
 1. That's it :)
 
@@ -260,15 +260,14 @@ u'Hi, Joe!'
 The response to the RPC request is `'Hi, Joe!'`. It's as expected and the
 service printed the name. But what exactly did just happen? When we issued the
 request lymph did the following:
+
 1. looked up the address of the greeting service in Zookeeper
 1. serialized the request body with msgpack
 1. sent it over the wire via zeromq
 1. the service received the request
 1. the service deserialized the request using msgpack
-1. the service performed the heavy computation to produce the desired greeting
-   for Joe
-1. the response was once more serialized(msgpack) and sent back(zeromq) to the
-   requestee
+1. the service performed the heavy computation to produce the desired greeting for Joe
+1. the response was once more serialized(msgpack) and sent back(zeromq) to the requestee
 1. the requestee(our shell client) deseria... and printed
 
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
