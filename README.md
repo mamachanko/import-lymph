@@ -141,7 +141,7 @@ boot the vagrant box.
 
 [This](services/greeting.py) is what a simple greeting service looks like in
 lymph. Its interface is one RPC method called `greet` which takes a name,
-prints it, emits an event(containing the text in the body) and returns a
+prints it, emits an event(containing the name in the body) and returns a
 greeting for the given name.
 
 ```python
@@ -214,28 +214,68 @@ not, we'll explore them one by one.
 To begin with let's assert that an instance of the echo service is running.
 We'll use lymph's `discover` command.
 
-``` shell
+```shell
 » lymph discover
 Greeting [1]
 ```
 
-As you can see, one instance is running indeed (`Greeting [1]`).
+As you can see, one instance is running indeed (`Greeting [1]`). But what did
+just happen?  When the service started in the right-hand pane it registered
+itself with Zookeeper by providing its name and address. When we ran the
+dicovery command found that entry. If we stopped the service, it'd
+unregistered itself and the discovery command would say that no instances are
+running.
 
-Let's excercise the service's `greet` method. We'll use lymph's `request`
-command. Therefore, we have to provide the service name, the name of the method
-and the body of the request as JSON. What we expect to see is the echo service
-to return the text as is, but it should also print it and emit an event.
+Let's pretend we don't know what the greeting service has to offer. We'd like
+to find out though:
+ 
+```shell
+» lymph inspect Greeting
+RPC interface of Greeting
+
+rpc Greeting.greet(name)
+
+rpc lymph.get_metrics()
+
+rpc lymph.inspect()
+         Returns a description of all available rpc methods of this service
+
+rpc lymph.ping(payload)
+
+rpc lymph.status()
+```
+
+We see that the interface of the greeting service is composed of inherited
+methods(from `lymph.Interface`) and our `greet` method. Let's excercise the
+`greet` method. We'll use lymph's `request` command. Therefore, we have to
+provide the service name, the name of the method and the body of the request as
+JSON. What we expect to see is the echo service to return the text as is, but
+it should also print it and emit an event.
 
 ```shell
 » lymph request Greeting.greet '{"name": "Joe"}'
 u'Hi, Joe!'
 ```
 
-The result of the RPC is `'Hi, Joe!'` as expected and the service printed the
-name.
+The response to the RPC request is `'Hi, Joe!'`. It's as expected and the
+service printed the name. But what exactly did just happen? When we issued the
+request lymph did the following:
+1. looked up the address of the greeting service in Zookeeper
+1. serialized the request body with msgpack
+1. sent it over the wire via zeromq
+1. the service received the request
+1. the service deserialized the request using msgpack
+1. the service performed the heavy computation to produce the desired greeting
+   for Joe
+1. the response was once more serialized(msgpack) and sent back(zeromq) to the
+   requestee
+1. the requestee(our shell client) deseria... and printed
 
-This is boring and our service must be pretty lonely. Nobody listens to its
-events. Here comes a listener.
+Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
+This is all the glue that lymph is.
+
+Our single service is rather boring though. It's also pretty lonely. Nobody
+listens to its events. Here comes a listener.
 
 #### The listen service
 
@@ -277,7 +317,7 @@ Greeting [2]
 Listen [1]
 ```
 
-And, indeed, they list correctly.
+And, indeed, they list correctly. Remember, this comes from Zookeeper.
 
 Let's emit a `greeted` event in the event system to assert whether the listen
 service listens to it. We'll use lymph's `emit` command. We're expecting the
@@ -287,10 +327,26 @@ listen service to print the name field from the event body.
 » lymph emit greeted '{"name": "Joe"}'
 ```
 
-Nice. That worked.
+Nice. That worked. The listen service printed as expected. But what did just
+happen exactly? Our shell client serialized the event body using msgpack and
+published it to RabbitMQ with the `greeted` event type. Then it returned. The
+listen service on the other hand is subscribed to these events in RabbitMQ.
+Once we published it consumed the event, deserialized it and processed it. As
+an outcome it printed.
 
-When we do RPCs now we expect the greeting instances to respond in round-robin
-fashion while the listen instance should rect to all occuring events.
+If there were several instances of the listen service only one of them would've
+consumed the event. That's singlecast. Lymph can also broadcast to all
+instances of a service.
+
+Keep in mind that if another service would've subscribed to this event as well,
+once instance of it would've also consumed the event. Yet, only one instance of
+each subscribed service. That's the pub-sub communication pattern. Also, we
+could emit any random event and our shell client would return, e.g. `lymph emit
+hi '{}'`. Publishers don't know about subcribers or if they exist at all.
+
+Returning to our example, when we do RPC requests we expect the greeting
+instances to respond in round-robin fashion while the listen instance should
+rect to all occuring events.
 
 ``` shell
 » lymph request Greeting.greet '{"name": "Joe"}'
@@ -298,10 +354,12 @@ u'Hi, Joe!'
 ```
 (do this repeatedly, until both greeting instances have responded)
 
-As you see, our expectations are met.
+As you see, our expectations are met. Lymph takes care of picking one of the
+instances from Zookeeper. That's client-side load-balancing.
 
 If we were to run several instances of the listen services, each event would be
-consumed by exactly once instance. However, lymph allows to broadcast events.
+consumed by exactly once instance. However, lymph allows to broadcast events as
+mentioned above.
 
 Finally, since it's 2015, no talk would be complete without talking about HTTP.
 Let's add a web service to the mix. Let's say we wanted to expose the greeting
@@ -312,8 +370,11 @@ functionality via an HTTP API. Lymph has a class for that.
 [This](services/web.py) is the Web service. It subclasses lymph's
 `WebServiceInterface`. In this case we're not exposing RPC methods, emitting
 not listening to events. However, we configure a Werkzeug URL map as a class
-attribute. We've added one endpoint: `/greet` and a handler for it. The handler
+attribute. We've added one endpoint and a handler for it: `/greet`. The handler
 receives a Werkzeug request object.
+
+Webservice are very powerful as they help to expose our services capabilities
+to the world in the internet's language: HTTP.
 
 ```python
 from lymph.web.interfaces import WebServiceInterface
@@ -569,7 +630,8 @@ Again, you run it by pointing it to the desired config file:
 You can also share instance of such classes over instances of your services.
 All service instances [share the same zookeeper client
 instance](https://github.com/deliveryhero/lymph/blob/master/conf/sample-node.yml#L9)
-by default.
+by default. Or you read from [environment
+variables](http://lymph.readthedocs.org/en/latest/configuration.html#environment-variables).
 
 #### Up and down
 
@@ -686,4 +748,4 @@ on GitHub.
 
 If you should spot any unclarities or errata within this introduction, you're
 very welcome to point them out at
-[github.com/mamachanko/import-lymph](https://nameko.readthedocs.org/)
+[github.com/mamachanko/import-lymph](https://nameko.readthedocs.org/).
