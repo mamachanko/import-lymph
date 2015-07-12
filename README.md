@@ -748,7 +748,7 @@ Distconfig is intended to complement lymph.
 
 ### Outroduction
 
-Thank you very much for you attention! We're done. We hope you enjoyed this
+Thank you very much for your attention! We're done. We hope you enjoyed this
 little introduction. If you feel that the ice is broken we'd consider ourselves
 successful. If you should have questions feel free to reach out in our IRC
 channel `#lymph` on _freenode.net_. Naturally, we'd appreciate PRs and issues
