@@ -262,12 +262,12 @@ service printed the name. But what exactly did just happen? When we issued the
 request lymph did the following:
 
 1. looked up the address of the greeting service in Zookeeper
-1. serialized the request body with msgpack
+1. serialized the request body with MessagePack
 1. sent it over the wire via zeromq
 1. the service received the request
-1. the service deserialized the request using msgpack
+1. the service deserialized the request using MessagePack
 1. the service performed the heavy computation to produce the desired greeting for Joe
-1. the response was once more serialized(msgpack) and sent back(zeromq) to the requestee
+1. the response was once more serialized(MessagePack) and sent back(ZeroMQ) to the requestee
 1. the requestee(our shell client) deseria... and printed
 
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
@@ -327,7 +327,7 @@ listen service to print the name field from the event body.
 ```
 
 Nice. That worked. The listen service printed as expected. But what did just
-happen exactly? Our shell client serialized the event body using msgpack and
+happen exactly? Our shell client serialized the event body using MessagePack and
 published it to RabbitMQ with the `greeted` event type. Then it returned. The
 listen service on the other hand is subscribed to these events in RabbitMQ.
 Once we published it consumed the event, deserialized it and processed it. As
@@ -691,8 +691,8 @@ instances' addresses and routes the request. That means, lymph does client-side
 load balancing. Request
 [round-robin](https://github.com/deliveryhero/lymph/blob/master/lymph/core/rpc.py#L140-155)
 over the instances of a service. The request itself is being serialized with
-[msgpack](http://msgpack.org/) and send over the wire using
-[zeromq](http://zeromq.org/).
+[MessagePack](http://msgpack.org/) and send over the wire using
+[ZeroMQ](http://zeromq.org/).
 
 Lymph's pub-sub event system is powered by
 [RabbitMQ](https://www.rabbitmq.com/).  That means any valid topic exchange
