@@ -388,11 +388,14 @@ class Web(WebServiceInterface):
     ])
 
     def greet(self, request):
+        """
+        handles:
+            /greet?name=<name>
+        """
         name = request.args['name']
         print('About to greet %s' % name)
-        return Response(
-            self.proxy('Greeting').greet(name=name)
-        )
+        greeting = self.proxy('Greeting').greet(name=name)
+        return Response(greeting)
 ```
 
 The greet handler expects a name to be present in the query string. It calls
