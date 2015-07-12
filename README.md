@@ -141,10 +141,10 @@ boot the vagrant box.
 
 #### The greeting service
 
-[This](services/greeting.py) is what a simple greeting service looks like in
-lymph. Its interface is one RPC method called `greet` which takes a name,
-prints it, emits an event(containing the name in the body) and returns a
-greeting for the given name.
+[This](https://github.com/mamachanko/import-lymph/blob/master/services/greeting.py)
+is what a simple greeting service looks like in lymph. Its interface is one RPC
+method called `greet` which takes a name, prints it, emits an event(containing
+the name in the body) and returns a greeting for the given name.
 
 ```python
 import lymph
@@ -179,7 +179,7 @@ where it can import it from. Since lymph imports the interface, its modulea
 needs to be on the `PYTHONPATH`. We can make this happen with `export
 PYTHONPATH=services` in our example. But worry not, the tmuxinator sessions
 take care of it for you. Our service's configuration looks like
-[this](conf/greeting.yml):
+[this](https://github.com/mamachanko/import-lymph/blob/master/conf/greeting.yml):
 
 ```yaml
 interfaces:
@@ -280,11 +280,13 @@ listens to its events. Here comes a listener.
 
 #### The listen service
 
-The [listen service](services/listen.py) listens to greeting's events Again,
-it's a lymph service(we inherit from `lymph.Interface`). However, there's
-nothing but one method which is subscribed to `greeted` events. It simply
-prints the greeted name contained in the event's body. Everytime an event of
-this type occurs exactly once instance of the listen service will consume it.
+The [listen
+service](https://github.com/mamachanko/import-lymph/blob/master/services/listen.py)
+listens to greeting's events Again, it's a lymph service(we inherit from
+`lymph.Interface`). However, there's nothing but one method which is subscribed
+to `greeted` events. It simply prints the greeted name contained in the event's
+body. Everytime an event of this type occurs exactly once instance of the
+listen service will consume it.
 
 ```python
 import lymph
@@ -300,8 +302,9 @@ class Listen(lymph.Interface):
 Let's excercise our services combination. This time round, though, we'll run
 two instances of the greeting service and one instance of the listen service.
 
-The [listen service's configuration](conf/listen.yml) is no different from the
-one before.
+The [listen service's
+configuration](https://github.com/mamachanko/import-lymph/blob/master/conf/listen.yml)
+is no different from the one before.
 
 ``` shell
 » mux start greeting-listen
@@ -368,11 +371,11 @@ functionality via an HTTP API. Lymph has a class for that.
 
 #### The web service
 
-[This](services/web.py) is the Web service. It subclasses lymph's
-`WebServiceInterface`. In this case we're not exposing RPC methods, emitting
-not listening to events. However, we configure a Werkzeug URL map as a class
-attribute. We've added one endpoint and a handler for it: `/greet`. The handler
-receives a Werkzeug request object.
+[This](https://github.com/mamachanko/import-lymph/blob/master/services/web.py)
+is the Web service. It subclasses lymph's `WebServiceInterface`. In this case
+we're not exposing RPC methods, emitting not listening to events. However, we
+configure a Werkzeug URL map as a class attribute. We've added one endpoint and
+a handler for it: `/greet`. The handler receives a Werkzeug request object.
 
 Webservice are very powerful as they help to expose our services capabilities
 to the world in the internet's language: HTTP.
@@ -409,8 +412,9 @@ Mind, that we're not validating the request method nor anything else.
 Run it or it didn't happen, they say. We'll bring up an instance of each of
 services now.
 
-Once more, the [web service's configuration](conf/web.yml) is no different from
-the ones we looked at before.
+Once more, the [web service's
+configuration](https://github.com/mamachanko/import-lymph/blob/master/conf/web.yml)
+is no different from the ones we looked at before.
 
 ``` shell
 » mux start all
