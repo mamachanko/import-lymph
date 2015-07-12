@@ -35,8 +35,8 @@ because we use NFS to share files.
 Once inside the box, the `motd` contains more information. You can directly
 follow all the examples shown in this introduction.
 
-<img align="left" src="images/motd.png" width="49%">
-<img align="right" src="images/mux.png" width="49%">
+<img align="left" src="https://github.com/mamachanko/import-lymph/blob/master/images/motd.png" width="49%">
+<img align="right" src="https://github.com/mamachanko/import-lymph/blob/master/images/mux.png" width="49%">
 
 Let's start then!
 
@@ -541,7 +541,7 @@ header. If you check the logs within the tail pane you should see that all logs
 can be correlated with that trace id. And indeed we see the same `trace_id`
 across our service instances for every incoming request:
 
-<img src="images/tail.png" width="98%">
+<img src="https://github.com/mamachanko/import-lymph/blob/master/images/tail.png" width="98%">
 
 We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
