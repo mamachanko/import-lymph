@@ -9,11 +9,10 @@ container:
         class: lymph.discovery.zookeeper:ZookeeperServiceRegistry
         zkclient: dep:kazoo
 
-
-event_system:
-    class: lymph.events.kombu:KombuEventSystem
-    transport: amqp
-    hostname: rabbitmq
+    events:
+        class: lymph.events.kombu:KombuEventSystem
+        transport: amqp
+        hostname: rabbitmq
 
 
 instances:
