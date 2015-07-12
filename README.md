@@ -24,6 +24,8 @@ machine.
 Getting hands-on is a matter of running:
 
 ```shell
+git clone git@github.com:mamachanko/import-lymph.git
+cd import-lymph
 vagrant up && vagrant ssh
 ```
 
