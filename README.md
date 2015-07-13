@@ -30,7 +30,8 @@ vagrant up && vagrant ssh
 ```
 
 You will be prompted for your root password half-way through `vagrant up`
-because we use NFS to share files.
+because we use NFS to share files. If on Ubuntu(or else) you may have to
+specifically install packages to support NFS.
 
 Once inside the box, the `motd` contains more information. You can directly
 follow all the examples shown in this introduction.
@@ -79,7 +80,7 @@ Before we go ahead, here's a little disclaimer. For the sake of this
 introduction, we assume that you're familiar with the concept of services. We
 assume you're familiar with monoliths. We assume that you are familiar with
 when and why to use either and even more so when not. We will not discuss the
-differences between the two. We won't talk about how services might safe your
+differences between the two. We won't talk about how services might save your
 development teams or your business. Neither will we talk about sophisticated
 networking topologies, Docker, "microservices", ...
 
@@ -269,7 +270,8 @@ request lymph did the following:
 1. the service received the request
 1. the service deserialized the request using MessagePack
 1. the service performed the heavy computation to produce the desired greeting for Joe
-1. the response was once more serialized(MessagePack) and sent back(ZeroMQ) to the requestee
+1. an event is being emitted to the event system about which we will find out more with the next service
+1. the response was once again serialized(MessagePack) and sent back(ZeroMQ) to the requestee
 1. the requestee(our shell client) deseria... and printed
 
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
@@ -285,7 +287,7 @@ service](https://github.com/mamachanko/import-lymph/blob/master/services/listen.
 listens to greeting's events Again, it's a lymph service(we inherit from
 `lymph.Interface`). However, there's nothing but one method which is subscribed
 to `greeted` events. It simply prints the greeted name contained in the event's
-body. Everytime an event of this type occurs exactly once instance of the
+body. Everytime an event of this type occurs exactly one instance of the
 listen service will consume it.
 
 ```python
@@ -343,7 +345,7 @@ consumed the event. That's singlecast. Lymph can also broadcast to all
 instances of a service.
 
 Keep in mind that if another service would've subscribed to this event as well,
-once instance of it would've also consumed the event. Yet, only one instance of
+one instance of it would've also consumed the event. Yet, only one instance of
 each subscribed service. That's the pub-sub communication pattern. Also, we
 could emit any random event and our shell client would return, e.g. `lymph emit
 hi '{}'`. Publishers don't know about subcribers or if they exist at all.
@@ -362,7 +364,7 @@ As you see, our expectations are met. Lymph takes care of picking one of the
 instances from Zookeeper. That's client-side load-balancing.
 
 If we were to run several instances of the listen services, each event would be
-consumed by exactly once instance. However, lymph allows to broadcast events as
+consumed by exactly one instance. However, lymph allows to broadcast events as
 mentioned above.
 
 Finally, since it's 2015, no talk would be complete without talking about HTTP.
