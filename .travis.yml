@@ -5,3 +5,6 @@ install: "pip install -r requirements.txt"
 script:
   - PYTHONPATH=services nosetests --with-lymph
   - python scripts/highlight.py
+after_success:
+  - gem install jekyll
+  - bash scripts/deploy_pages.sh

@@ -1,15 +1,15 @@
+---
+layout: default
+---
+
 <img alt="build status" align="right" src="https://travis-ci.org/mamachanko/import-lymph.svg">
 
 # `import lymph`
+> An introduction to [lymph](http://lymph.io), a framework for Python services
 
-Welcome to an introduction to [lymph](http://lymph.io). Lymph is a framework
-for writing services in Python.
-
-## Playground
-
-We've got a [vagrant](http://vagrantup.com) box for you with lymph services
-running inside. We suggest you use it, but local setup should be straightfoward
-as well.
+Hi and thanks for being here. I'd like to introduce you to lymph and Python
+services. This introduction is very much example-driven. But fear not, you can
+excercise all examples within a vagrant box.
 
 The box provisions with all tooling and code ready for your perusal. It has
 both [Zookeeper](http://zookeeper.apache.org/) and
@@ -23,7 +23,7 @@ machine.
 
 Getting hands-on is a matter of running:
 
-```shell
+```bash
 git clone git@github.com:mamachanko/import-lymph.git
 cd import-lymph
 vagrant up && vagrant ssh
@@ -36,17 +36,16 @@ specifically install packages to support NFS.
 Once inside the box, the `motd` contains more information. You can directly
 follow all the examples shown in this introduction.
 
-<img align="left" src="https://github.com/mamachanko/import-lymph/blob/master/images/motd.png" width="49%">
-<img align="right" src="https://github.com/mamachanko/import-lymph/blob/master/images/mux.png" width="49%">
+<img align="left" src="https://rawgit.com/mamachanko/import-lymph/master/images/motd.png" width="49%">
+<img align="right" src="https://rawgit.com/mamachanko/import-lymph/master/images/mux.png" width="49%">
 
-Let's start then!
+_Let's start then!_
 
 ## Stop trying to glue your services together
-> An introduction to lymph by Alejandro Castillo & Max Brauer
 
-We'd like to introduce you to _lymph_, a framework for
-writing services in Python. With lymph you can write services with almost no
-boilerplate. But let's introduce ourselves first.
+_Lymph_ is a framework for writing services in Python. With lymph you can write
+services with almost no boilerplate and easily run, test and configure them.
+But let's introduce ourselves first.
 
 We're [Delivery Hero](http://deliveryhero.com), a holding of online
 food-ordering services. We're located in Berlin. We operate in 34 countries
@@ -63,10 +62,10 @@ simple:
 * pay online
 * wait for delivery
 
-Basically, it's e-commerce with very grumpy customers.
+Basically, it's e-commerce with very grumpy customers and an emphasis on fast
+fulfillment.
 
-How's this introduce structured? Let's briefly go over the topics of this
-introduction:
+How's this introduction structured? Let's briefly go over the topics:
 
 1. We're going to explain where we're coming from and why we have given birth to a(nother) framework
 1. We'll look at code as fast possible
@@ -166,7 +165,7 @@ and decorate RPC methods with `@lymph.rpc()`. Lastly, we've got the interface's
 
 Let's jump on the shell and play with it.
 
-``` shell
+```bash
 » mux start greeting
 ```
 
@@ -196,7 +195,7 @@ development of services easier.
 
 So what tooling is available? `lymph list` will tell us.
 
-``` shell
+```bash
 » lymph list
 node       Run a node service that manages a group of processes on the same machine.
 shell      Open an interactive Python shell locally or remotely.
@@ -217,7 +216,7 @@ not, we'll explore them one by one.
 To begin with let's assert that an instance of the echo service is running.
 We'll use lymph's `discover` command.
 
-```shell
+```bash
 » lymph discover
 Greeting [1]
 ```
@@ -232,7 +231,7 @@ running.
 Let's pretend we don't know what the greeting service has to offer. We'd like
 to find out though:
  
-```shell
+```bash
 » lymph inspect Greeting
 RPC interface of Greeting
 
@@ -255,7 +254,7 @@ provide the service name, the name of the method and the body of the request as
 JSON. What we expect to see is the echo service to return the text as is, but
 it should also print it and emit an event.
 
-```shell
+```bash
 » lymph request Greeting.greet '{"name": "Joe"}'
 u'Hi, Joe!'
 ```
@@ -308,7 +307,7 @@ The [listen service's
 configuration](https://github.com/mamachanko/import-lymph/blob/master/conf/listen.yml)
 is no different from the one before.
 
-``` shell
+```bash
 » mux start greeting-listen
 ```
 
@@ -317,7 +316,7 @@ greeting service followed by an instance of the listen service.
 
 We should find them registered correctly.
 
-``` shell
+```bash
 » lymph discover
 Greeting [2]
 Listen [1]
@@ -354,7 +353,7 @@ Returning to our example, when we do RPC requests we expect the greeting
 instances to respond in round-robin fashion while the listen instance should
 rect to all occuring events.
 
-``` shell
+```bash
 » lymph request Greeting.greet '{"name": "Joe"}'
 u'Hi, Joe!'
 ```
@@ -418,7 +417,7 @@ Once more, the [web service's
 configuration](https://github.com/mamachanko/import-lymph/blob/master/conf/web.yml)
 is no different from the ones we looked at before.
 
-``` shell
+```bash
 » mux start all
 ```
 
@@ -427,7 +426,7 @@ listen.
 
 Once again, they should have registered correctly:
 
-``` shell
+```bash
 » lymph discover
 Web [1]
 Greeting [1]
@@ -489,7 +488,7 @@ be any other service you need, e.g. Redis.
 
 Let's bring them all up.
 
-``` shell
+```bash
 » mux start all
 ```
 
@@ -498,7 +497,7 @@ the top-right pane. Below that you see `lymph tail` running which allows us to
 follow the logs of any number of services. But first, let's check how many
 instances are running:
 
-``` shell
+```bash
 » lymph discover
 Web [2]
 Greeting [3]
@@ -508,7 +507,7 @@ Listen [4]
 That's a good number. Once we feed a request into the cluster we should see
 print statements and logs appearing.
 
-``` shell
+```bash
 » http localhost:4080/greet?name=Joe
 HTTP/1.1 200 OK
 Content-Length: 8
@@ -523,7 +522,7 @@ Hi, Joe!
 Within the `node` pane we should the see following haiku-esque sequence of print
 statements:
 
-```shell
+```bash
 » lymph node
 About to greet Joe
 Saying hi to Joe
@@ -543,7 +542,7 @@ header. If you check the logs within the tail pane you should see that all logs
 can be correlated with that trace id. And indeed we see the same `trace_id`
 across our service instances for every incoming request:
 
-<img src="https://github.com/mamachanko/import-lymph/blob/master/images/tail.png" width="98%">
+<img src="https://rawgit.com/mamachanko/import-lymph/master/images/tail.png" width="98%">
 
 We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
@@ -556,11 +555,12 @@ left to the reader as an excercise.
 #### Testing
 
 Let's talk about features which go beyond CLI tooling. Testing services is
-crucial for development. Have a look at our services [`tests`](tests.py) to get
-an idea of lymph testing utilities. The tests showcase how you would tests
+crucial for development. Have a look at our services
+[`tests`](https://github.com/mamachanko/import-lymph/blob/master/tests.py) to
+get an idea of lymph testing utilities. The tests showcase how you would tests
 these three varieties of services. You can run the tests with:
 
-```shell
+```bash
 PYTHONPATH=services nosetests --with-lymph
 ```
 
@@ -613,7 +613,7 @@ class Service(lymph.Interface):
 As you see it takes only one line to configure the service. Running it is a matter
 of pointing to the desired config file:
 
-```shell
+```bash
 » lymph instance --config=conf/service_redis.yml
 ```
 
@@ -633,7 +633,7 @@ interfaces:
 
 Again, you run it by pointing it to the desired config file:
 
-```shell
+```bash
 » lymph instance --config=conf/service_memcache.yml
 ```
 
