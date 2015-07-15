@@ -12,6 +12,6 @@ windows:
                 - toilet -f smblock node
                 - lymph node
             - tail:
-                - sleep 1
+                - sleep 2
                 - toilet -f smblock tail
                 - lymph tail Web Greeting Listen
