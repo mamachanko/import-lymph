@@ -8,7 +8,7 @@ mkdir out
 
 cd out
 
-cp -r ../public/_site out
+cp -r ../public/_site/* .
 cp ../public/CNAME ./CNAME
 
 git init
