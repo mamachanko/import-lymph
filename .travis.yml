@@ -6,5 +6,5 @@ script:
   - PYTHONPATH=services nosetests --with-lymph
   - python scripts/highlight.py
 after_success:
-  - gem install jekyll
-  - bash scripts/deploy_pages.sh
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then export DEPLOY_PAGES=true; fi
+  - if [ "$DEPLOY_PAGES" ]; then gem install jekyll && bash scripts/deploy_pages.sh; else echo "not deploying pages"; fi
