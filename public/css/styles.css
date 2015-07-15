@@ -1,5 +1,7 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
+
 html {
-  font: 16px/1.5 "Helvetica Neue", sans-serif;
+  font: 16px/1.5 Lato, "Helvetica Neue", sans-serif;
 }
 
 @media (min-width: 30rem) {
@@ -75,7 +77,6 @@ h3, h4, h5, h6 {
 p, ul, ol, dl, table, pre, blockquote {
   margin-top: 0;
   margin-bottom: 1rem;
-  text-align: justify;
 }
 
 ul, ol {
@@ -149,7 +150,7 @@ pre > code {
 }
 
 .container {
-  width: 600px;
+  width: 700px;
   margin: 0 auto;
   padding: 0 1rem;
 }

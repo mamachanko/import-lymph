@@ -5,15 +5,11 @@ layout: default
 <img alt="build status" align="right" src="https://travis-ci.org/mamachanko/import-lymph.svg">
 
 # `import lymph`
+> An introduction to [lymph](http://lymph.io), a framework for Python services
 
-Welcome to an introduction to [lymph](http://lymph.io). Lymph is a framework
-for writing services in Python.
-
-## Playground
-
-We've got a [vagrant](http://vagrantup.com) box for you with lymph services
-running inside. We suggest you use it, but local setup should be straightfoward
-as well.
+Hi and thanks for being here. I'd like to introduce you to lymph and Python
+services. This introduction is very much example-driven. But fear not, you can
+excercise all examples within a vagrant box.
 
 The box provisions with all tooling and code ready for your perusal. It has
 both [Zookeeper](http://zookeeper.apache.org/) and
@@ -43,14 +39,13 @@ follow all the examples shown in this introduction.
 <img align="left" src="https://rawgit.com/mamachanko/import-lymph/master/images/motd.png" width="49%">
 <img align="right" src="https://rawgit.com/mamachanko/import-lymph/master/images/mux.png" width="49%">
 
-Let's start then!
+_Let's start then!_
 
 ## Stop trying to glue your services together
-> An introduction to lymph by Alejandro Castillo & Max Brauer
 
-We'd like to introduce you to _lymph_, a framework for
-writing services in Python. With lymph you can write services with almost no
-boilerplate. But let's introduce ourselves first.
+_Lymph_ is a framework for writing services in Python. With lymph you can write
+services with almost no boilerplate and easily run, test and configure them.
+But let's introduce ourselves first.
 
 We're [Delivery Hero](http://deliveryhero.com), a holding of online
 food-ordering services. We're located in Berlin. We operate in 34 countries
@@ -67,10 +62,10 @@ simple:
 * pay online
 * wait for delivery
 
-Basically, it's e-commerce with very grumpy customers.
+Basically, it's e-commerce with very grumpy customers and an emphasis on fast
+fulfillment.
 
-How's this introduce structured? Let's briefly go over the topics of this
-introduction:
+How's this introduction structured? Let's briefly go over the topics:
 
 1. We're going to explain where we're coming from and why we have given birth to a(nother) framework
 1. We'll look at code as fast possible
