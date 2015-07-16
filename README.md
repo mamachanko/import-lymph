@@ -758,4 +758,4 @@ on GitHub.
 
 If you should spot any unclarities or errata within this introduction, you're
 very welcome to point them out at
-[github.com/mamachanko/import-lymph](https://nameko.readthedocs.org/).
+[github.com/mamachanko/import-lymph](http://github.com/mamachanko/import-lymph).
