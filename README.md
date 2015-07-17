@@ -276,6 +276,9 @@ request lymph did the following:
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
 This is all the glue that lymph is.
 
+Here's the screencast:
+[![asciicast](https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv.png)](https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv)
+
 Our single service is rather boring though. It's also pretty lonely. Nobody
 listens to its events. Here comes a listener.
 
@@ -366,6 +369,9 @@ If we were to run several instances of the listen services, each event would be
 consumed by exactly one instance. However, lymph allows to broadcast events as
 mentioned above.
 
+Here's the screencast:
+[![asciicast](https://asciinema.org/a/23575.png)](https://asciinema.org/a/23575)
+
 Finally, since it's 2015, no talk would be complete without talking about HTTP.
 Let's add a web service to the mix. Let's say we wanted to expose the greeting
 functionality via an HTTP API. Lymph has a class for that.
@@ -451,6 +457,9 @@ Hi, Joe!
 ```
 
 The response looks good and all services should have performed accordingly.
+
+Here's the screencast:
+[![asciicast](https://asciinema.org/a/23578.png)](https://asciinema.org/a/23578)
 
 #### Lymph's development server
 
@@ -546,6 +555,9 @@ across our service instances for every incoming request:
 
 We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
+
+Here's the screencast:
+[![asciicast](https://asciinema.org/a/23579.png)](https://asciinema.org/a/23579)
 
 There's one command we haven't tried yet. That's `lymph subscribe`. It is being
 left to the reader as an excercise.
