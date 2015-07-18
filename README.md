@@ -1,6 +1,7 @@
 ---
 layout: default
 ---
+<img alt="logo" align="center" src="images/logo.png">
 
 <img alt="build status" align="right" src="https://travis-ci.org/mamachanko/import-lymph.svg">
 
