@@ -1,7 +1,8 @@
 ---
 layout: default
 ---
-<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/logo.png">
+
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/logo.png" width="100%">
 
 <img alt="build status" align="right" src="https://travis-ci.org/mamachanko/import-lymph.svg">
 
@@ -274,13 +275,13 @@ request lymph did the following:
 1. the response was once again serialized(MessagePack) and sent back(ZeroMQ) to the requestee
 1. the requestee(our shell client) deseria... and printed
 
-<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting.png">
+<img alt="greeting" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting.png" width="100%">
 
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
 This is all the glue that lymph is.
 
 Here's the screencast:
-[![asciicast](https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv.png)](https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv)
+<a href="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv"><img alt="asciicast" align="center" src="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv.png" width="100%"></a>
 
 Our single service is rather boring though. It's also pretty lonely. Nobody
 listens to its events. Here comes a listener.
@@ -368,14 +369,14 @@ u'Hi, Joe!'
 As you see, our expectations are met. Lymph takes care of picking one of the
 instances from Zookeeper. That's client-side load-balancing.
 
-<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting-listen.png">
+<img alt="greeting-listen" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting-listen.png" width="100%">
 
 If we were to run several instances of the listen services, each event would be
 consumed by exactly one instance. However, lymph allows to broadcast events as
 mentioned above.
 
 Here's the screencast:
-[![asciicast](https://asciinema.org/a/23575.png)](https://asciinema.org/a/23575)
+<a href="https://asciinema.org/a/23575"><img alt="asciicast" align="center" src="https://asciinema.org/a/23575.png" width="100%"></a>
 
 Finally, since it's 2015, no talk would be complete without talking about HTTP.
 Let's add a web service to the mix. Let's say we wanted to expose the greeting
@@ -463,10 +464,10 @@ Hi, Joe!
 
 The response looks good and all services should have performed accordingly.
 
-<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/all.png">
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/all.png" width="100%">
 
 Here's the screencast:
-[![asciicast](https://asciinema.org/a/23578.png)](https://asciinema.org/a/23578)
+<a href="https://asciinema.org/a/23578"><img alt="asciicast" align="center" src="https://asciinema.org/a/23578.png" width="100%"></a>
 
 #### Lymph's development server
 
@@ -545,7 +546,7 @@ Saying hi to Joe
 Somebody greeted Joe
 ```
 
-<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/node.png">
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/node.png" width="100%">
 
 Within the `tail` pane though, there's a lot going on. You would find an even
 bigger mess the more services and instances you run and the more intricated
@@ -558,15 +559,21 @@ We are able to corellate all log statements in our cluster to that one HTTP
 request. In fact the web service returns the the trace id in the `X-Trace-Id`
 header. If you check the logs within the tail pane you should see that all logs
 can be correlated with that trace id. And indeed we see the same `trace_id`
-across our service instances for every incoming request:
+across our service instances for every incoming request. Here are the logs:
 
-<img src="https://rawgit.com/mamachanko/import-lymph/master/images/tail.png" width="98%">
+```
+[tcp://127.0.0.1:37589][a4673a399d] [INFO] 2015-07-18 11:17:34,646 [INFO] lymph.web.interfaces: GET /greet - trace_id="04dc39a5a1a44c809ec31a2dfde62f71"
+[tcp://127.0.0.1:37589][a4673a399d] [INFO] 2015-07-18 11:17:34,650 [INFO] lymph.discovery.zookeeper: lookup Greeting [u'04aab0092de567633d1e07eef008f5a4', u'778473fbdbacfcad179edb4c77b663ce', u'f00b2470407f16f72bdf85f95f5dd965'] - trace_id="04dc39a5a1a44c809ec31a2dfde62f71"
+[tcp://127.0.0.1:56546][f00b247040] [INFO] 2015-07-18 11:17:34,681 [INFO] lymph.core.rpc: Greeting.greet source=tcp://127.0.0.1:37589 - trace_id="04dc39a5a1a44c809ec31a2dfde62f71"
+[tcp://127.0.0.1:37589][a4673a399d] [INFO] 2015-07-18 11:17:34,713 [INFO] lymph.web.wsgi_server: client=127.0.0.1 - - "GET /greet?name=Flynne HTTP/1.1" status=200 length=174 duration=0.066961 (seconds) - trace_id="04dc39a5a1a44c809ec31a2dfde62f71"
+[tcp://127.0.0.1:56546][f00b247040] [INFO] 2015-07-18 11:17:34,728 [INFO] lymph.core.rpc: subject=Greeting.greet duration=0.044457 (seconds) - trace_id="04dc39a5a1a44c809ec31a2dfde62f71"
+```
 
 We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
 
 Here's the screencast:
-[![asciicast](https://asciinema.org/a/23579.png)](https://asciinema.org/a/23579)
+<a href="https://asciinema.org/a/23579"><img alt="asciicast" align="center" src="https://asciinema.org/a/23579.png" width="100%"></a>
 
 There's one command we haven't tried yet. That's `lymph subscribe`. It is being
 left to the reader as an excercise.
