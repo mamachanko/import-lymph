@@ -9,21 +9,26 @@ layout: default
 # `import lymph`
 > An introduction to [lymph](http://lymph.io), a framework for Python services
 
-Hi and thanks for being here. I'd like to introduce you to lymph and Python
-services. This introduction is very much example-driven. But fear not, you can
-excercise all examples within a vagrant box.
+> by [Max Brauer](https://mamachanko.github.io)
 
-The box provisions with all tooling and code ready for your perusal. It has
-both [Zookeeper](http://zookeeper.apache.org/) and
-[RabbitMQ](https://www.rabbitmq.com/) running inside. Services and lymph's
-tooling can be explored within pre-configured tmux sessions.
+Hi, and thanks for being here. I'd like to introduce you to lymph and Python
+services. This introduction explains how to write and run services with lymph.
+We explore lymph's capabilities and tooling by progressively creating a little
+cluster, service by service. It is very much hands-on and example-driven. Worry
+not, we have prepared a playground in a vagrant box.
+
+The vagrant box provisions with all tooling and code ready for your perusal. It
+has both [Zookeeper](http://zookeeper.apache.org/)(for service discovery) and
+[RabbitMQ](https://www.rabbitmq.com/)(as an event system) running inside.
+Services and lymph's tooling can be explored within pre-configured tmux
+sessions.
 
 The only prerequisits are
 [vagrant](http://docs.vagrantup.com/v2/installation/index.html) and
 [ansible](http://docs.ansible.com/intro_installation.html) on your host
 machine.
 
-Getting hands-on is a matter of running:
+Getting your hand's firty is a matter of:
 
 ```bash
 git clone git@github.com:mamachanko/import-lymph.git
@@ -32,22 +37,23 @@ vagrant up && vagrant ssh
 ```
 
 You will be prompted for your root password half-way through `vagrant up`
-because we use NFS to share files. If on Ubuntu(or else) you may have to
-specifically install packages to support NFS.
+because we use NFS to share files. If on Ubuntu(or somewhere else) you may have
+to install packages to support NFS.
 
-Once inside the box, the `motd` contains more information. You can directly
-follow all the examples shown in this introduction.
+Once inside the box, the [`motd`](https://en.wikipedia.org/wiki/Motd_(Unix))
+contains more information. You can replay all the examples shown in this
+introduction. Here's a little teaser:
 
 <img align="left" src="https://rawgit.com/mamachanko/import-lymph/master/images/motd.png" width="49%">
 <img align="right" src="https://rawgit.com/mamachanko/import-lymph/master/images/mux.png" width="49%">
 
-_Let's start then!_
+Let's go ahead then!
 
 ## Stop trying to glue your services together
 
-_Lymph_ is a framework for writing services in Python. With lymph you can write
-services with almost no boilerplate and easily run, test and configure them.
-But let's introduce ourselves first.
+[Lymph](http://lymph.io) is a framework for writing services in Python. With
+lymph you can write services with almost no boilerplate, easily run, test
+and configure them. But let's introduce ourselves first.
 
 We're [Delivery Hero](http://deliveryhero.com), a holding of online
 food-ordering services. We're located in Berlin. We operate in 34 countries
@@ -81,35 +87,37 @@ Before we go ahead, here's a little disclaimer. For the sake of this
 introduction, we assume that you're familiar with the concept of services. We
 assume you're familiar with monoliths. We assume that you are familiar with
 when and why to use either and even more so when not. We will not discuss the
-differences between the two. We won't talk about how services might save your
-development teams or your business. Neither will we talk about sophisticated
-networking topologies, Docker, "microservices", ...
+differences between the two. We won't talk about whether services will save your
+development teams or your business. Neither will we talk about the cloud, Docker,
+whether to call it "microservices" ...
 
-But what we're going to talk about is lymph. By the end of the talk you should
-understand what lymph can and cannot do and why that's cool. If we achieved
-that we'd consider ourselves succesful.
+Yet, what we're going to talk about is lymph. By the end of this introduction
+you should be able understand what lymph can and cannot do and why that's cool.
+If I achieved that I succeeded.
 
-### Why write a framework?
+### Why write a(nother) framework?
 
-Our initial situation was the classic one. We had a massive Django monolith.
-We weren't moving fast at all. We've had trouble finding rhythm for a growing
-number of teams and developers. Teams were blocked by other teams. The code
-base was a big bowl of legacy spaghetti. We've had issues scaling.
+Around two years ago _"we wanted services in Python and not worry"_. In fact,
+this statement expresses three desires: services, Python and comfort. The first
+two need to be justified. The remaining one yielded lymph.
 
-Basically, what comes to mind is the textbook situation: "my monolith hurts, i
-want services". The idea of a service-oriented architecture became increasingly
-reasonable and attractive to us.
+We wanted services because our big Django monolith hurt a lot. We weren't
+moving fast at all.  We've had trouble finding rhythm for a growing number of
+teams and developers. Teams were blocked by other teams. The code base was a
+big bowl of legacy spaghetti. We've had issues scaling. Basically, what comes
+to mind is the textbook situation: "my monolith hurts, i want services". The
+idea of a service-oriented architecture became increasingly reasonable and
+attractive to us.
 
-Another aspect is our heterogenic product landscape. While most countries'
-websites work the same("order food online") they all differ one way or another.
-Modularity, extensibility, reuseability, scaleability... are key for us.
+Yet, why did we want to stick to Python? Well, to begin with, we like Python a
+lot.  We've had a good amount of experience running it in Production. And we
+wanted all developers to stay productive.
 
-Still, the obvious question is: _"why write another framework?"_. The answer is
-almost as obvious. At that time there was nothing that fits our needs. We wanted
-to work with services but we wanted some very specific things:
+Lastly, we didn't want to worry. As a developer you shouldn't have to worry
+about how to run your service, how register it, how to discover other service
+or how to serialize anything to send it over the wire. At that time there was
+nothing that fit our needs. We wanted some very specific things:
 
-* We are mainly Python-powered and we wanted to continue rolling with it.
-  Language-agnosticity is great, but not really important for us(yet).
 * Running and testing services should be easy.
 * Developers shouldn't have to worry about registering and discovering services.
 * You don't have to serialize data for sending it over the wire. Neither do you
@@ -127,17 +135,17 @@ developers and functionality they want to serve.
 
 You might say _"hey, use [nameko](https://nameko.readthedocs.org)"_. But nameko
 has not come to our attention until few months ago. Neither was it mature
-enough to be adopted way back then. Later we're going to talk technologies
-similar to nameko and lymph.
+enough to be adopted way back then. Later though, we're going to talk
+technologies similar to nameko and lymph.
 
-Taking all these things into consideration, rolling our own thing was actually
+Taking all these things into consideration, rolling our own thing was very
 reasonable. And to not suspend any further, say hello to
 [lymph](http://lymph.io). Hopefully, you're itching to see what a service looks
-like in lymph. If you know nameko you won't be surprised though.
+like in lymph.
 
 We'll break the ice by running and playing around with services. We'll slowly
 progress through lymph's features, service by service. This is a good time to
-boot the vagrant box.
+boot the vagrant box: `vagrant up`.
 
 ### Hands-on
 
@@ -165,20 +173,25 @@ All we need to do to make things happen is to inherit from `lymph.Interface`
 and decorate RPC methods with `@lymph.rpc()`. Lastly, we've got the interface's
 `emit()` function to our disposal which dispatches events in the event system.
 
-Let's jump on the shell and play with it.
+Let's jump on the shell and play with it. Within our vagrant box, this will start
+a tmux session and run an instance of the Greeting service:
 
 ```bash
 » mux start greeting
 ```
 
-What you see here is a tmux session with two panes. On the right-hand side you
+What you see is a tmux session with two panes. On the right-hand side you
 see the greeting service being run with lymph's `instance` command. On the
 left-hand side you see a plain shell on which we'll explore lymph's tooling.
 
-Every time you want to run an instance of a servcie you need to point lymph to
+If you're lazy and don't want to continue reading this section nor try things
+yourself here's a screencast:
+<a href="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv"><img alt="asciicast" align="center" src="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv.png" width="100%"></a>
+
+Every time you want to run an instance of a service you need to point lymph to
 its configuration. The configuration tells lymph about the interface's name and
-where it can import it from. Since lymph imports the interface, its modulea
-needs to be on the `PYTHONPATH`. We can make this happen with `export
+where it can import it from. Since lymph imports the interface at runtime, the
+module needs to be on the `PYTHONPATH`. We can make this happen with `export
 PYTHONPATH=services` in our example. But worry not, the tmuxinator sessions
 take care of it for you. Our service's configuration looks like
 [this](https://github.com/mamachanko/import-lymph/blob/master/conf/greeting.yml):
@@ -215,8 +228,8 @@ emit       Manually emits an event.
 You see there's plenty of commands available to interact with services. Worry
 not, we'll explore them one by one.
 
-To begin with let's assert that an instance of the echo service is running.
-We'll use lymph's `discover` command.
+To begin with we'll assert that an instance of the echo service is running.
+That's what lymph's `discover` command is for:
 
 ```bash
 » lymph discover
@@ -224,18 +237,18 @@ Greeting [1]
 ```
 
 As you can see, one instance is running indeed (`Greeting [1]`). But what did
-just happen?  When the service started in the right-hand pane it registered
+just happen? When the service started in the right-hand panel it registered
 itself with Zookeeper by providing its name and address. When we ran the
-dicovery command found that entry. If we stopped the service, it'd
-unregistered itself and the discovery command would say that no instances are
-running.
+dicovery command found that entry. If we stopped the service, it'd unregister
+itself and the discovery command would say that no instances are running.
 
 Let's pretend we don't know what the greeting service has to offer. We'd like
-to find out though:
+to find out about its interface though:
  
 ```bash
 » lymph inspect Greeting
 RPC interface of Greeting
+        Returns a greeting for a provided name
 
 rpc Greeting.greet(name)
 
@@ -253,35 +266,35 @@ We see that the interface of the greeting service is composed of inherited
 methods(from `lymph.Interface`) and our `greet` method. Let's excercise the
 `greet` method. We'll use lymph's `request` command. Therefore, we have to
 provide the service name, the name of the method and the body of the request as
-JSON. What we expect to see is the echo service to return the text as is, but
-it should also print it and emit an event.
+valid JSON. What we expect to see is the Greeting service to return a Greeting
+but it should also print it and emit an event.
 
 ```bash
-» lymph request Greeting.greet '{"name": "Joe"}'
-u'Hi, Joe!'
+» lymph request Greeting.greet '{"name": "Flynne"}'
+u'Hi, Flynne!'
 ```
 
-The response to the RPC request is `'Hi, Joe!'`. It's as expected and the
+The response to the RPC request is `'Hi, Flynne!'`. It's as expected and the
 service printed the name. But what exactly did just happen? When we issued the
 request lymph did the following:
 
-1. looked up the address of the greeting service in Zookeeper
+1. looked up the address of the greeting service instance in Zookeeper
 1. serialized the request body with MessagePack
 1. sent it over the wire via zeromq
 1. the service received the request
 1. the service deserialized the request using MessagePack
-1. the service performed the heavy computation to produce the desired greeting for Joe
+1. the service performed the heavy computation to produce the desired greeting for Flynne
 1. an event is being emitted to the event system about which we will find out more with the next service
 1. the response was once again serialized(MessagePack) and sent back(ZeroMQ) to the requestee
 1. the requestee(our shell client) deseria... and printed
 
-<img alt="greeting" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting.png" width="100%">
-
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
 This is all the glue that lymph is.
 
-Here's the screencast:
-<a href="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv"><img alt="asciicast" align="center" src="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv.png" width="100%"></a>
+Here's a visualisation of what happened. The purple clipboard is synonomous
+with ZooKeeper as the service registry and the Greeting service instance is
+the red speech bubble:
+<img alt="greeting" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting.png" width="100%">
 
 Our single service is rather boring though. It's also pretty lonely. Nobody
 listens to its events. Here comes a listener.
@@ -290,11 +303,11 @@ listens to its events. Here comes a listener.
 
 The [listen
 service](https://github.com/mamachanko/import-lymph/blob/master/services/listen.py)
-listens to greeting's events Again, it's a lymph service(we inherit from
-`lymph.Interface`). However, there's nothing but one method which is subscribed
-to `greeted` events. It simply prints the greeted name contained in the event's
-body. Everytime an event of this type occurs exactly one instance of the
-listen service will consume it.
+listens to greeting's events. Again, it's a lymph service(we inherit from
+`lymph.Interface`). However, there's nothing but one method which consumes
+`greeted` events. It simply prints the greeted name contained in the event's
+body. Everytime an event of this type occurs exactly one instance of the listen
+service will consume it.
 
 ```python
 import lymph
@@ -307,12 +320,12 @@ class Listen(lymph.Interface):
         print('Somebody greeted %s' % event['name'])
 ```
 
-Let's excercise our services combination. This time round, though, we'll run
-two instances of the greeting service and one instance of the listen service.
-
 The [listen service's
 configuration](https://github.com/mamachanko/import-lymph/blob/master/conf/listen.yml)
 is no different from the one before.
+
+Let's excercise our services combination. This time round, though, we'll run
+two instances of the greeting service and one instance of the listen service:
 
 ```bash
 » mux start greeting-listen
@@ -320,6 +333,9 @@ is no different from the one before.
 
 Again, we see a tmux session. On the right you find two instances of the
 greeting service followed by an instance of the listen service.
+
+Here's the screencast:
+<a href="https://asciinema.org/a/23575"><img alt="asciicast" align="center" src="https://asciinema.org/a/23575.png" width="100%"></a>
 
 We should find them registered correctly.
 
@@ -336,7 +352,7 @@ service listens to it. We'll use lymph's `emit` command. We're expecting the
 listen service to print the name field from the event body.
 
 ```
-» lymph emit greeted '{"name": "Joe"}'
+» lymph emit greeted '{"name": "Flynne"}'
 ```
 
 Nice. That worked. The listen service printed as expected. But what did just
@@ -361,22 +377,23 @@ instances to respond in round-robin fashion while the listen instance should
 rect to all occuring events.
 
 ```bash
-» lymph request Greeting.greet '{"name": "Joe"}'
-u'Hi, Joe!'
+» lymph request Greeting.greet '{"name": "Flynne"}'
+u'Hi, Flynne!'
 ```
 (do this repeatedly, until both greeting instances have responded)
 
 As you see, our expectations are met. Lymph takes care of picking one of the
 instances from Zookeeper. That's client-side load-balancing.
 
+Here's a visualisation of the services' interaction. Again, ZooKeeper is
+synonomous with the purple clipboard, the Greeting service instances are the
+red speech bubbles and the Listen service instance is the green headset:
+
 <img alt="greeting-listen" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting-listen.png" width="100%">
 
 If we were to run several instances of the listen services, each event would be
 consumed by exactly one instance. However, lymph allows to broadcast events as
 mentioned above.
-
-Here's the screencast:
-<a href="https://asciinema.org/a/23575"><img alt="asciicast" align="center" src="https://asciinema.org/a/23575.png" width="100%"></a>
 
 Finally, since it's 2015, no talk would be complete without talking about HTTP.
 Let's add a web service to the mix. Let's say we wanted to expose the greeting
@@ -390,8 +407,8 @@ we're not exposing RPC methods, emitting not listening to events. However, we
 configure a Werkzeug URL map as a class attribute. We've added one endpoint and
 a handler for it: `/greet`. The handler receives a Werkzeug request object.
 
-Webservice are very powerful as they help to expose our services capabilities
-to the world in the internet's language: HTTP.
+Webservices are very powerful as they expose our services' capabilities to the
+world in the internet's language: HTTP.
 
 ```python
 from lymph.web.interfaces import WebServiceInterface
@@ -416,8 +433,8 @@ class Web(WebServiceInterface):
         return Response(greeting)
 ```
 
-The greet handler expects a name to be present in the query string. It calls
-the greeting service via the `self.proxy`, returns the result in the
+The `greet` handler expects a name to be present in the query string. It calls
+the Greeting service via the `self.proxy`, returns the result in the
 response and it prints.
 
 Mind, that we're not validating the request method nor anything else.
@@ -433,10 +450,11 @@ is no different from the ones we looked at before.
 » mux start all
 ```
 
-On the right you can see an instance of every service: web, greeting and
-listen.
+Here's the screencast:
+<a href="https://asciinema.org/a/23578"><img alt="asciicast" align="center" src="https://asciinema.org/a/23578.png" width="100%"></a>
 
-Once again, they should have registered correctly:
+On the right you can see an instance of every service: web, greeting and
+listen. Once again, they should have registered correctly:
 
 ```bash
 » lymph discover
@@ -451,14 +469,14 @@ listening at the default port 4080. We're using `httpie` to excercise the
 request:
 
 ```
-» http localhost:4080/greet?name=Joe
+» http localhost:4080/greet?name=Flynne
 HTTP/1.1 200 OK
 Content-Length: 8
 Content-Type: text/plain; charset=utf-8
 Date: Wed, 08 Jul 2015 20:51:30 GMT
 X-Trace-Id: 3adc102707f745239efb2837c1877f59
 
-Hi, Joe!
+Hi, Flynne!
 
 ```
 
@@ -466,16 +484,14 @@ The response looks good and all services should have performed accordingly.
 
 <img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/all.png" width="100%">
 
-Here's the screencast:
-<a href="https://asciinema.org/a/23578"><img alt="asciicast" align="center" src="https://asciinema.org/a/23578.png" width="100%"></a>
 
 #### Lymph's development server
 
 Yet, when developing locally you seldomly want to run all of your services
-within different shells or tmux panes. Lymph has its own development server
-which wraps around any number of services with any number of instances.
-Therefore, we'll have to configure which services to run and with how many
-instances in [`.lymph.yml`](.lymph.yml):
+within different shells or tmux panels. Lymph has its own development server
+which wraps around any number of services with any number of instances. It's
+called `lymph node`.  We'll have to configure which services to run and how
+many instances of each in [`.lymph.yml`](.lymph.yml):
 
 ```yaml
 instances:
@@ -498,9 +514,9 @@ sockets:
 ```
 
 (Since we run several instances of our web service we have to configure a
-shared sockets for it.)
+shared socket for it.)
 
-Mind that in our case `command` specifies lymph instances but this could also
+Mind, that in our case `command` specifies lymph instances but this could also
 be any other service you need, e.g. Redis.
 
 Let's bring them all up.
@@ -508,6 +524,9 @@ Let's bring them all up.
 ```bash
 » mux start all
 ```
+
+Here's the screencast:
+<a href="https://asciinema.org/a/23579"><img alt="asciicast" align="center" src="https://asciinema.org/a/23579.png" width="100%"></a>
 
 Once more, we find ourselves inside a tmux session with `lymph node` running in
 the top-right pane. Below that you see `lymph tail` running which allows us to
@@ -525,14 +544,14 @@ That's a good number. Once we feed a request into the cluster we should see
 print statements and logs appearing.
 
 ```bash
-» http localhost:4080/greet?name=Joe
+» http localhost:4080/greet?name=Flynne
 HTTP/1.1 200 OK
 Content-Length: 8
 Content-Type: text/plain; charset=utf-8
 Date: Wed, 08 Jul 2015 20:51:30 GMT
 X-Trace-Id: 3adc102707f745239efb2837c1877f59
 
-Hi, Joe!
+Hi, Flynne!
 
 ```
 
@@ -541,11 +560,13 @@ statements:
 
 ```bash
 » lymph node
-About to greet Joe
-Saying hi to Joe
-Somebody greeted Joe
+About to greet Flynne
+Saying hi to Flynne
+Somebody greeted Flynne
 ```
 
+Here's a visualisation of what's going on within our service cluster. The
+symbols should be self-explanatory:
 <img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/node.png" width="100%">
 
 Within the `tail` pane though, there's a lot going on. You would find an even
@@ -571,9 +592,6 @@ across our service instances for every incoming request. Here are the logs:
 
 We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
-
-Here's the screencast:
-<a href="https://asciinema.org/a/23579"><img alt="asciicast" align="center" src="https://asciinema.org/a/23579.png" width="100%"></a>
 
 There's one command we haven't tried yet. That's `lymph subscribe`. It is being
 left to the reader as an excercise.
