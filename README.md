@@ -1,6 +1,7 @@
 ---
 layout: default
 ---
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/logo.png">
 
 <img alt="build status" align="right" src="https://travis-ci.org/mamachanko/import-lymph.svg">
 
@@ -139,7 +140,7 @@ boot the vagrant box.
 
 ### Hands-on
 
-#### The greeting service
+#### The Greeting service
 
 [This](https://github.com/mamachanko/import-lymph/blob/master/services/greeting.py)
 is what a simple greeting service looks like in lymph. Its interface is one RPC
@@ -273,6 +274,8 @@ request lymph did the following:
 1. the response was once again serialized(MessagePack) and sent back(ZeroMQ) to the requestee
 1. the requestee(our shell client) deseria... and printed
 
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting.png">
+
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
 This is all the glue that lymph is.
 
@@ -282,7 +285,7 @@ Here's the screencast:
 Our single service is rather boring though. It's also pretty lonely. Nobody
 listens to its events. Here comes a listener.
 
-#### The listen service
+#### The Listen service
 
 The [listen
 service](https://github.com/mamachanko/import-lymph/blob/master/services/listen.py)
@@ -365,6 +368,8 @@ u'Hi, Joe!'
 As you see, our expectations are met. Lymph takes care of picking one of the
 instances from Zookeeper. That's client-side load-balancing.
 
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting-listen.png">
+
 If we were to run several instances of the listen services, each event would be
 consumed by exactly one instance. However, lymph allows to broadcast events as
 mentioned above.
@@ -376,7 +381,7 @@ Finally, since it's 2015, no talk would be complete without talking about HTTP.
 Let's add a web service to the mix. Let's say we wanted to expose the greeting
 functionality via an HTTP API. Lymph has a class for that.
 
-#### The web service
+#### The Web service
 
 [This](https://github.com/mamachanko/import-lymph/blob/master/services/web.py)
 is the Web service. It subclasses lymph's `WebServiceInterface`. In this case
@@ -458,6 +463,8 @@ Hi, Joe!
 
 The response looks good and all services should have performed accordingly.
 
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/all.png">
+
 Here's the screencast:
 [![asciicast](https://asciinema.org/a/23578.png)](https://asciinema.org/a/23578)
 
@@ -537,6 +544,8 @@ About to greet Joe
 Saying hi to Joe
 Somebody greeted Joe
 ```
+
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/node.png">
 
 Within the `tail` pane though, there's a lot going on. You would find an even
 bigger mess the more services and instances you run and the more intricated
