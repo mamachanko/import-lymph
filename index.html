@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+
+  <meta charset="utf-8">
+  <title>import lymph</title>
+  <meta name="description" content="an introduction to lymph, a framework for Python services">
+  <meta name="author" content="Max Brauer / mamachanko">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/pygments.css">
+
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body>
+
+  <div class="container">
+    <h1><a href="./"></a></h1>
+    <p><img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/logo.png" width="100%"></p>
+
+<p><img alt="build status" align="right" src="https://travis-ci.org/mamachanko/import-lymph.svg"></p>
+
+<h1><code>import lymph</code></h1>
+
+<blockquote>
+<p>An introduction to <a href="http://lymph.io">lymph</a>, a framework for Python services</p>
+
+<p>by <a href="https://mamachanko.github.io">Max Brauer</a></p>
+</blockquote>
+
+<p>Hi, and thanks for being here. I&#39;d like to introduce you to lymph and Python
+services. This introduction explains how to write and run services with lymph.
+We explore lymph&#39;s capabilities and tooling by progressively creating a little
+cluster, service by service. It is very much hands-on and example-driven. Worry
+not, we have prepared a playground in a vagrant box.</p>
+
+<p>The vagrant box provisions with all tooling and code ready for your perusal. It
+has both <a href="http://zookeeper.apache.org/">ZooKeeper</a>(for service discovery) and
+<a href="https://www.rabbitmq.com/">RabbitMQ</a>(as an event system) running inside.
+Services and lymph&#39;s tooling can be explored within pre-configured tmux
+sessions.</p>
+
+<p>The only prerequisites are
+<a href="http://docs.vagrantup.com/v2/installation/index.html">vagrant</a> and
+<a href="http://docs.ansible.com/intro_installation.html">ansible</a> on your host
+machine.</p>
+
+<p>Getting your hand&#39;s dirty is a matter of:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone git@github.com:mamachanko/import-lymph.git
+<span class="nb">cd </span>import-lymph
+vagrant up <span class="o">&amp;&amp;</span> vagrant ssh
+</code></pre></div>
+<p>You will be prompted for your root password half-way through <code>vagrant up</code>
+because we use NFS to share files. If on Ubuntu(or somewhere else) you may have
+to install packages to support NFS.</p>
+
+<p>Once inside the box, the <a href="https://en.wikipedia.org/wiki/Motd_(Unix)"><code>motd</code></a>
+contains more information. You can replay all the examples shown in this
+introduction. Here&#39;s a little teaser:</p>
+
+<p><img align="left" src="https://rawgit.com/mamachanko/import-lymph/master/images/motd.png" width="49%">
+<img align="right" src="https://rawgit.com/mamachanko/import-lymph/master/images/mux.png" width="49%"></p>
+
+<p>Let&#39;s go ahead then!</p>
+
+<h2>Stop trying to glue your services together</h2>
+
+<p><a href="http://lymph.io">Lymph</a> is a framework for writing services in Python. With
+lymph you can write services with almost no boilerplate, easily run, test
+and configure them. But let&#39;s introduce ourselves first.</p>
+
+<p>We&#39;re <a href="http://deliveryhero.com">Delivery Hero</a>, a holding of online
+food-ordering services. We&#39;re located in Berlin. We operate in 34 countries
+and growing.</p>
+
+<p>Let me explain the concept of online food-ordering to those who&#39;re unfamiliar
+with it. However, I seriously doubt this is news to anyone. The concept is
+simple:</p>
+
+<ul>
+<li>get hungry</li>
+<li>go online</li>
+<li>search for restaurants</li>
+<li>compile your order</li>
+<li>pay online</li>
+<li>wait for delivery</li>
+</ul>
+
+<p>Basically, it&#39;s E-commerce with very grumpy customers and an emphasis on fast
+fulfillment.</p>
+
+<p>How&#39;s this introduction structured? Let&#39;s briefly go over the topics:</p>
+
+<ol>
+<li>We&#39;re going to explain where we&#39;re coming from and why we have given birth to a(nother) framework</li>
+<li>We&#39;ll look at code as fast possible</li>
+<li>We&#39;ll run services and progressively add new services to explore forms of communication and the tooling of lymph</li>
+<li>We&#39;ll give you a brief overview of further features and talk about how lymph does things under the hood</li>
+<li>We&#39;ll touch on similar technology and see how it relates to lymph (Nameko in particular)</li>
+<li>We&#39;ll talk future plans for lymph and its ecosystem</li>
+<li>That&#39;s it :)</li>
+</ol>
+
+<p>Before we go ahead, here&#39;s a little disclaimer. For the sake of this
+introduction, we assume that you&#39;re familiar with the concept of services. We
+assume you&#39;re familiar with monoliths. We assume that you are familiar with
+when and why to use either and even more so when not. We will not discuss the
+differences between the two. We won&#39;t talk about whether services will save your
+development teams or your business. Neither will we talk about the cloud, Docker,
+whether to call it &quot;microservices&quot; ...</p>
+
+<p>Yet, what we&#39;re going to talk about is lymph. By the end of this introduction
+you should be able understand what lymph can and cannot do and why that&#39;s cool.
+If I achieved that I succeeded.</p>
+
+<h3>Why write a(nother) framework?</h3>
+
+<p>Around two years ago <em>&quot;we wanted services in Python and not worry&quot;</em>. In fact,
+this statement expresses three desires: services, Python and comfort. The first
+two need to be justified. The remaining one yielded lymph.</p>
+
+<p>We wanted services because our big Django monolith hurt a lot. We weren&#39;t
+moving fast at all.  We&#39;ve had trouble finding rhythm for a growing number of
+teams and developers. Teams were blocked by other teams. The code base was a
+big bowl of legacy spaghetti. We&#39;ve had issues scaling. Basically, what comes
+to mind is the textbook situation: &quot;my monolith hurts, I want services&quot;. The
+idea of a service-oriented architecture became increasingly reasonable and
+attractive to us.</p>
+
+<p>Yet, why did we want to stick to Python? Well, to begin with, we like Python a
+lot.  We&#39;ve had a good amount of experience running it in Production. And we
+wanted all developers to stay productive.</p>
+
+<p>Lastly, we didn&#39;t want to worry. As a developer you shouldn&#39;t have to worry
+about how to run your service, how register it, how to discover other service
+or how to serialize anything to send it over the wire. At that time there was
+nothing that fit our needs. We wanted some very specific things:</p>
+
+<ul>
+<li>Running and testing services should be easy.</li>
+<li>Developers shouldn&#39;t have to worry about registering and discovering services.</li>
+<li>You don&#39;t have to serialize data for sending it over the wire. Neither do you
+want to manually deserialize it.</li>
+<li>Requesting remote services should be almost like in-process calls.</li>
+<li>Developers shouldn&#39;t have to deal with event loops nor know about any
+transport mechanism.</li>
+<li>Configuring services should be straightforward and flexible.</li>
+<li>Scaling should be easy, but transparent to clients.</li>
+<li>Services should speak HTTP.</li>
+<li>We don&#39;t want boilerplate if it can be avoided.</li>
+</ul>
+
+<p>To sum things up, we wanted as little in the way as possible between
+developers and functionality they want to serve.</p>
+
+<p>You might say <em>&quot;hey, use <a href="https://nameko.readthedocs.org">nameko</a>&quot;</em>. But Nameko
+has not come to our attention until few months ago. Neither was it mature
+enough to be adopted way back then. Later though, we&#39;re going to talk
+technologies similar to Nameko and lymph.</p>
+
+<p>Taking all these things into consideration, rolling our own thing was very
+reasonable. And to not suspend any further, say hello to
+<a href="http://lymph.io">lymph</a>. Hopefully, you&#39;re itching to see what a service looks
+like in lymph.</p>
+
+<p>We&#39;ll break the ice by running and playing around with services. We&#39;ll slowly
+progress through lymph&#39;s features, service by service. This is a good time to
+boot the vagrant box: <code>vagrant up</code>.</p>
+
+<h3>Hands-on</h3>
+
+<h4>The Greeting service</h4>
+
+<p><a href="https://github.com/mamachanko/import-lymph/blob/master/services/greeting.py">This</a>
+is what a simple greeting service looks like in lymph. Its interface is one RPC
+method called <code>greet</code> which takes a name, prints it, emits an event(containing
+the name in the body) and returns a greeting for the given name.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">lymph</span>
+
+
+<span class="k">class</span> <span class="nc">Greeting</span><span class="p">(</span><span class="n">lymph</span><span class="o">.</span><span class="n">Interface</span><span class="p">):</span>
+
+    <span class="nd">@lymph.rpc</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Saying hi to </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s">&#39;greeted&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
+        <span class="k">return</span> <span class="s">u&#39;Hi, </span><span class="si">%s</span><span class="s">!&#39;</span> <span class="o">%</span> <span class="n">name</span>
+</code></pre></div>
+<p>All we need to do to make things happen is to inherit from <code>lymph.Interface</code>
+and decorate RPC methods with <code>@lymph.rpc()</code>. Lastly, we&#39;ve got the interface&#39;s
+<code>emit()</code> function to our disposal which dispatches events in the event system.</p>
+
+<p>Let&#39;s jump on the shell and play with it. Within our vagrant box, this will start
+a tmux session and run an instance of the Greeting service:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» mux start greeting
+</code></pre></div>
+<p>What you see is a tmux session with two panes. On the right-hand side you
+see the greeting service being run with lymph&#39;s <code>instance</code> command. On the
+left-hand side you see a plain shell on which we&#39;ll explore lymph&#39;s tooling.</p>
+
+<p>If you&#39;re lazy and don&#39;t want to continue reading this section nor try things
+yourself here&#39;s a screencast:
+<a href="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv"><img alt="asciicast" align="center" src="https://asciinema.org/a/9vnx72zknelhvc676in7d7uuv.png" width="100%"></a></p>
+
+<p>Every time you want to run an instance of a service you need to point lymph to
+its configuration. The configuration tells lymph about the interface&#39;s name and
+where it can import it from. Since lymph imports the interface at runtime, the
+module needs to be on the <code>PYTHONPATH</code>. We can make this happen with <code>export
+PYTHONPATH=services</code> in our example. But worry not, the tmuxinator sessions
+take care of it for you. Our service&#39;s configuration looks like
+<a href="https://github.com/mamachanko/import-lymph/blob/master/conf/greeting.yml">this</a>:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">interfaces</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">Greeting</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">greeting:Greeting</span>
+</code></pre></div>
+<p>The <code>lymph instance</code> command receives the path to this file.</p>
+
+<p>One of the first things we considered when building lymph was the tooling. We
+think we managed to get some very nice tooling built around it to make
+development of services easier.</p>
+
+<p>So what tooling is available? <code>lymph list</code> will tell us.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph list
+node       Run a node service that manages a group of processes on the same machine.
+shell      Open an interactive Python shell locally or remotely.
+<span class="nb">help       </span>Display <span class="nb">help </span>information about lymph.
+instance   Run a single service instance <span class="o">(</span>one process<span class="o">)</span>.
+list       List available commands.
+inspect    Describes the RPC interface of a service
+request    Send a request message to some service and output the reply.
+discover   Show available services.
+subscribe  Prints events to stdout.
+tail       Stream the logs of one or more services.
+emit       Manually emits an event.
+</code></pre></div>
+<p>You see there&#39;s plenty of commands available to interact with services. Worry
+not, we&#39;ll explore them one by one.</p>
+
+<p>To begin with we&#39;ll assert that an instance of the echo service is running.
+That&#39;s what lymph&#39;s <code>discover</code> command is for:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph discover
+Greeting <span class="o">[</span>1<span class="o">]</span>
+</code></pre></div>
+<p>As you can see, one instance is running indeed (<code>Greeting [1]</code>). But what did
+just happen? When the service started in the right-hand panel it registered
+itself with ZooKeeper by providing its name and address. When we ran the
+discovery command found that entry. If we stopped the service, it&#39;d unregister
+itself and the discovery command would say that no instances are running.</p>
+
+<p>Let&#39;s pretend we don&#39;t know what the greeting service has to offer. We&#39;d like
+to find out about its interface though:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph inspect Greeting
+RPC interface of Greeting
+        Returns a greeting <span class="k">for</span> a provided name
+
+rpc Greeting.greet<span class="o">(</span>name<span class="o">)</span>
+
+rpc lymph.get_metrics<span class="o">()</span>
+
+rpc lymph.inspect<span class="o">()</span>
+         Returns a description of all available rpc methods of this service
+
+rpc lymph.ping<span class="o">(</span>payload<span class="o">)</span>
+
+rpc lymph.status<span class="o">()</span>
+</code></pre></div>
+<p>We see that the interface of the greeting service is composed of inherited
+methods(from <code>lymph.Interface</code>) and our <code>greet</code> method. Let&#39;s exercise the
+<code>greet</code> method. We&#39;ll use lymph&#39;s <code>request</code> command. Therefore, we have to
+provide the service name, the name of the method and the body of the request as
+valid JSON. What we expect to see is the Greeting service to return a Greeting
+but it should also print it and emit an event.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph request Greeting.greet <span class="s1">&#39;{&quot;name&quot;: &quot;Flynne&quot;}&#39;</span>
+u<span class="s1">&#39;Hi, Flynne!&#39;</span>
+</code></pre></div>
+<p>The response to the RPC request is <code>&#39;Hi, Flynne!&#39;</code>. It&#39;s as expected and the
+service printed the name. But what exactly did just happen? When we issued the
+request lymph did the following:</p>
+
+<ol>
+<li>it looked up the address of the greeting service instance in ZooKeeper</li>
+<li>serialized the request body with MessagePack</li>
+<li>sent it over the wire via ZeroMQ</li>
+<li>the service received the request</li>
+<li>the service deserialized the request using MessagePack</li>
+<li>the service performed the heavy computation to produce the desired greeting for Flynne</li>
+<li>an event is being emitted to the event system about which we will find out more with the next service</li>
+<li>the response was once again serialized(MessagePack) and sent back(ZeroMQ) to the requestee</li>
+<li>the requestee(our shell client) deseria... and printed</li>
+</ol>
+
+<p>Whoi! That&#39;s a lot. This is where lymph lives up to this introduction&#39;s claim.
+This is all the glue that lymph is.</p>
+
+<p>Here&#39;s a visualisation of what happened. The purple clipboard is synonymous
+with ZooKeeper as the service registry and the Greeting service instance is
+the red speech bubble:
+<img alt="greeting" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting.png" width="100%"></p>
+
+<p>Our single service is rather boring though. It&#39;s also pretty lonely. Nobody
+listens to its events. Here comes a listener.</p>
+
+<h4>The Listen service</h4>
+
+<p>The <a href="https://github.com/mamachanko/import-lymph/blob/master/services/listen.py">listen
+service</a>
+listens to greeting&#39;s events. Again, it&#39;s a lymph service(we inherit from
+<code>lymph.Interface</code>). However, there&#39;s nothing but one method which consumes
+<code>greeted</code> events. It simply prints the greeted name contained in the event&#39;s
+body. Every time an event of this type occurs exactly one instance of the listen
+service will consume it.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">lymph</span>
+
+
+<span class="k">class</span> <span class="nc">Listen</span><span class="p">(</span><span class="n">lymph</span><span class="o">.</span><span class="n">Interface</span><span class="p">):</span>
+
+    <span class="nd">@lymph.event</span><span class="p">(</span><span class="s">&#39;greeted&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">on_greeted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Somebody greeted </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+</code></pre></div>
+<p>The <a href="https://github.com/mamachanko/import-lymph/blob/master/conf/listen.yml">listen service&#39;s
+configuration</a>
+is no different from the one before.</p>
+
+<p>Let&#39;s exercise our services combination. This time round, though, we&#39;ll run
+two instances of the greeting service and one instance of the listen service:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» mux start greeting-listen
+</code></pre></div>
+<p>Again, we see a tmux session. On the right you find two instances of the
+greeting service followed by an instance of the listen service.</p>
+
+<p>Here&#39;s the screencast:
+<a href="https://asciinema.org/a/23575"><img alt="asciicast" align="center" src="https://asciinema.org/a/23575.png" width="100%"></a></p>
+
+<p>We should find them registered correctly.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph discover
+Greeting <span class="o">[</span>2<span class="o">]</span>
+Listen <span class="o">[</span>1<span class="o">]</span>
+</code></pre></div>
+<p>And, indeed, they list correctly. Remember, this comes from Zookeeper.</p>
+
+<p>Let&#39;s emit a <code>greeted</code> event in the event system to assert whether the listen
+service listens to it. We&#39;ll use lymph&#39;s <code>emit</code> command. We&#39;re expecting the
+listen service to print the name field from the event body.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">» lymph emit greeted &#39;{&quot;name&quot;: &quot;Flynne&quot;}&#39;
+</code></pre></div>
+<p>Nice. That worked. The listen service printed as expected. But what did just
+happen exactly? Our shell client serialized the event body using MessagePack and
+published it to RabbitMQ with the <code>greeted</code> event type. Then it returned. The
+listen service on the other hand is subscribed to these events in RabbitMQ.
+Once we published it consumed the event, deserialized it and processed it. As
+an outcome it printed.</p>
+
+<p>If there were several instances of the listen service only one of them would&#39;ve
+consumed the event. That&#39;s singlecast. Lymph can also broadcast to all
+instances of a service.</p>
+
+<p>Keep in mind that if another service would&#39;ve subscribed to this event as well,
+one instance of it would&#39;ve also consumed the event. Yet, only one instance of
+each subscribed service. That&#39;s the pub-sub communication pattern. Also, we
+could emit any random event and our shell client would return, e.g. <code>lymph emit
+hi &#39;{}&#39;</code>. Publishers don&#39;t know about subscribers or if they exist at all.</p>
+
+<p>Returning to our example, when we do RPC requests we expect the greeting
+instances to respond in round-robin fashion while the listen instance should
+react to all occurring events.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph request Greeting.greet <span class="s1">&#39;{&quot;name&quot;: &quot;Flynne&quot;}&#39;</span>
+u<span class="s1">&#39;Hi, Flynne!&#39;</span>
+</code></pre></div>
+<p>(do this repeatedly, until both greeting instances have responded)</p>
+
+<p>As you see, our expectations are met. Lymph takes care of picking one of the
+instances from Zookeeper. That&#39;s client-side load-balancing.</p>
+
+<p>Here&#39;s a visualisation of the services&#39; interaction. Again, ZooKeeper is
+synonymous with the purple clipboard, the Greeting service instances are the
+red speech bubbles and the Listen service instance is the green headset:</p>
+
+<p><img alt="greeting-listen" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting-listen.png" width="100%"></p>
+
+<p>If we were to run several instances of the listen services, each event would be
+consumed by exactly one instance. However, lymph allows to broadcast events as
+mentioned above.</p>
+
+<p>Finally, since it&#39;s 2015, no talk would be complete without talking about HTTP.
+Let&#39;s add a web service to the mix. Let&#39;s say we wanted to expose the greeting
+functionality via an HTTP API. Lymph has a class for that.</p>
+
+<h4>The Web service</h4>
+
+<p><a href="https://github.com/mamachanko/import-lymph/blob/master/services/web.py">This</a>
+is the Web service. It subclasses lymph&#39;s <code>WebServiceInterface</code>. In this case
+we&#39;re not exposing RPC methods, emitting not listening to events. However, we
+configure a Werkzeug URL map as a class attribute. We&#39;ve added one endpoint and
+a handler for it: <code>/greet</code>. The handler receives a Werkzeug request object.</p>
+
+<p>Web services are very powerful as they expose our services&#39; capabilities to the
+world in the internet&#39;s language: HTTP.</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">lymph.web.interfaces</span> <span class="kn">import</span> <span class="n">WebServiceInterface</span>
+<span class="kn">from</span> <span class="nn">werkzeug.routing</span> <span class="kn">import</span> <span class="n">Map</span><span class="p">,</span> <span class="n">Rule</span>
+<span class="kn">from</span> <span class="nn">werkzeug.wrappers</span> <span class="kn">import</span> <span class="n">Response</span>
+
+
+<span class="k">class</span> <span class="nc">Web</span><span class="p">(</span><span class="n">WebServiceInterface</span><span class="p">):</span>
+
+    <span class="n">url_map</span> <span class="o">=</span> <span class="n">Map</span><span class="p">([</span>
+        <span class="n">Rule</span><span class="p">(</span><span class="s">&#39;/greet&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;greet&#39;</span><span class="p">),</span>
+    <span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">greet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        handles:</span>
+<span class="sd">            /greet?name=&lt;name&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;About to greet </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">greeting</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">(</span><span class="s">&#39;Greeting&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">greet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>greet</code> handler expects a name to be present in the query string. It calls
+the Greeting service via the <code>self.proxy</code>, returns the result in the
+response and it prints.</p>
+
+<p>Mind, that we&#39;re not validating the request method nor anything else.</p>
+
+<p>Run it or it didn&#39;t happen, they say. We&#39;ll bring up an instance of each of
+services now.</p>
+
+<p>Once more, the <a href="https://github.com/mamachanko/import-lymph/blob/master/conf/web.yml">web service&#39;s
+configuration</a>
+is no different from the ones we looked at before.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» mux start all
+</code></pre></div>
+<p>Here&#39;s the screencast:
+<a href="https://asciinema.org/a/23578"><img alt="asciicast" align="center" src="https://asciinema.org/a/23578.png" width="100%"></a></p>
+
+<p>On the right you can see an instance of every service: web, greeting and
+listen. Once again, they should have registered correctly:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph discover
+Web <span class="o">[</span>1<span class="o">]</span>
+Greeting <span class="o">[</span>1<span class="o">]</span>
+Listen <span class="o">[</span>1<span class="o">]</span>
+</code></pre></div>
+<p>Let&#39;s hit our web service and see how the request penetrates our service
+landscape. We should see all service print something. The web service is
+listening at the default port 4080. We&#39;re using <code>httpie</code> to exercise the
+request:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">» http localhost:4080/greet?name=Flynne
+HTTP/1.1 200 OK
+Content-Length: 8
+Content-Type: text/plain; charset=utf-8
+Date: Wed, 08 Jul 2015 20:51:30 GMT
+X-Trace-Id: 3adc102707f745239efb2837c1877f59
+
+Hi, Flynne!
+</code></pre></div>
+<p>The response looks good and all services should have performed accordingly.</p>
+
+<p><img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/all.png" width="100%"></p>
+
+<h4>Lymph&#39;s development server</h4>
+
+<p>Yet, when developing locally you seldomly want to run all of your services
+within different shells or tmux panels. Lymph has its own development server
+which wraps around any number of services with any number of instances. It&#39;s
+called <code>lymph node</code>.  We&#39;ll have to configure which services to run and how
+many instances of each in <a href=".lymph.yml"><code>.lymph.yml</code></a>:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">instances</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">Web</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">command</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">lymph instance --config=conf/web.yml</span>
+        <span class="l-Scalar-Plain">numprocesses</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2</span>
+
+    <span class="l-Scalar-Plain">Greeting</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">command</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">lymph instance --config=conf/greeting.yml</span>
+        <span class="l-Scalar-Plain">numprocesses</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">3</span>
+
+    <span class="l-Scalar-Plain">Listen</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">command</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">lymph instance --config=conf/listen.yml</span>
+        <span class="l-Scalar-Plain">numprocesses</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">4</span>
+
+
+<span class="l-Scalar-Plain">sockets</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">Web</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">4080</span>
+</code></pre></div>
+<p>(Since we run several instances of our web service we have to configure a
+shared socket for it.)</p>
+
+<p>Mind, that in our case <code>command</code> specifies lymph instances but this could also
+be any other service you need, e.g. Redis.</p>
+
+<p>Let&#39;s bring them all up.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» mux start all
+</code></pre></div>
+<p>Here&#39;s the screencast:
+<a href="https://asciinema.org/a/23579"><img alt="asciicast" align="center" src="https://asciinema.org/a/23579.png" width="100%"></a></p>
+
+<p>Once more, we find ourselves inside a tmux session with <code>lymph node</code> running in
+the top-right pane. Below that you see <code>lymph tail</code> running which allows us to
+follow the logs of any number of services. But first, let&#39;s check how many
+instances are running:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph discover
+Web <span class="o">[</span>2<span class="o">]</span>
+Greeting <span class="o">[</span>3<span class="o">]</span>
+Listen <span class="o">[</span>4<span class="o">]</span>
+</code></pre></div>
+<p>That&#39;s a good number. Once we feed a request into the cluster we should see
+print statements and logs appearing.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» http localhost:4080/greet?name<span class="o">=</span>Flynne
+HTTP/1.1 <span class="m">200</span> OK
+Content-Length: 8
+Content-Type: text/plain<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Date: Wed, <span class="m">08</span> Jul <span class="m">2015</span> 20:51:30 GMT
+X-Trace-Id: 3adc102707f745239efb2837c1877f59
+
+Hi, Flynne!
+</code></pre></div>
+<p>Within the <code>node</code> pane we should the see following haiku-esque sequence of print
+statements:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph node
+About to greet Flynne
+Saying hi to Flynne
+Somebody greeted Flynne
+</code></pre></div>
+<p>Here&#39;s a visualisation of what&#39;s going on within our service cluster. The
+symbols should be self-explanatory:
+<img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/node.png" width="100%"></p>
+
+<p>Within the <code>tail</code> pane though, there&#39;s a lot going on. You would find an even
+bigger mess the more services and instances you run and the more intricate
+your patterns of communication become. Sometimes you wonder &quot;where did my
+request go?&quot;. Lymph helps you though with <code>trace_id</code>s. Every request that
+appears in our cluster which doesn&#39;t have a <em>trace id</em> assigned yet gets one.
+Trace ids are forwarded with every RPC and event.</p>
+
+<p>We are able to correlate all log statements in our cluster to that one HTTP
+request. In fact the web service returns the trace id in the <code>X-Trace-Id</code>
+header. If you check the logs within the tail pane you should see that all logs
+can be correlated with that trace id. And indeed we see the same <code>trace_id</code>
+across our service instances for every incoming request. Here are the logs:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">[tcp://127.0.0.1:37589][a4673a399d] [INFO] 2015-07-18 11:17:34,646 [INFO] lymph.web.interfaces: GET /greet - trace_id=&quot;04dc39a5a1a44c809ec31a2dfde62f71&quot;
+[tcp://127.0.0.1:37589][a4673a399d] [INFO] 2015-07-18 11:17:34,650 [INFO] lymph.discovery.zookeeper: lookup Greeting [u&#39;04aab0092de567633d1e07eef008f5a4&#39;, u&#39;778473fbdbacfcad179edb4c77b663ce&#39;, u&#39;f00b2470407f16f72bdf85f95f5dd965&#39;] - trace_id=&quot;04dc39a5a1a44c809ec31a2dfde62f71&quot;
+[tcp://127.0.0.1:56546][f00b247040] [INFO] 2015-07-18 11:17:34,681 [INFO] lymph.core.rpc: Greeting.greet source=tcp://127.0.0.1:37589 - trace_id=&quot;04dc39a5a1a44c809ec31a2dfde62f71&quot;
+[tcp://127.0.0.1:37589][a4673a399d] [INFO] 2015-07-18 11:17:34,713 [INFO] lymph.web.wsgi_server: client=127.0.0.1 - - &quot;GET /greet?name=Flynne HTTP/1.1&quot; status=200 length=174 duration=0.066961 (seconds) - trace_id=&quot;04dc39a5a1a44c809ec31a2dfde62f71&quot;
+[tcp://127.0.0.1:56546][f00b247040] [INFO] 2015-07-18 11:17:34,728 [INFO] lymph.core.rpc: subject=Greeting.greet duration=0.044457 (seconds) - trace_id=&quot;04dc39a5a1a44c809ec31a2dfde62f71&quot;
+</code></pre></div>
+<p>We&#39;ve covered most of the available tooling. You should have a pretty good idea
+how to interact with your services now.</p>
+
+<p>There&#39;s one command we haven&#39;t tried yet. That&#39;s <code>lymph subscribe</code>. It is being
+left to the reader as an exercise.</p>
+
+<h3>More built-in features</h3>
+
+<h4>Testing</h4>
+
+<p>Let&#39;s talk about features which go beyond CLI tooling. Testing services is
+crucial for development. Have a look at our services
+<a href="https://github.com/mamachanko/import-lymph/blob/master/tests.py"><code>tests</code></a> to
+get an idea of lymph testing utilities. The tests showcase how you would tests
+these three varieties of services. You can run the tests with:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">PYTHONPATH</span><span class="o">=</span>services nosetests --with-lymph
+</code></pre></div>
+<h4>Configuration</h4>
+
+<p>Earlier, we have mentioned that ease of configuration was a concern for lymph.
+There&#39;s an API to deal configuration files. Its thin abstraction over the
+actual YAML files but gives you the freedom to instantiate classes right from
+the config. This gives you the freedom to configure services with a minimal
+amount of code. Custom configuration can be processed by overriding lymph
+interface&#39;s <code>apply_config(self, config)</code> hook.</p>
+
+<p>Let&#39;s say your <code>Service</code> is supposed have a <code>cache_client</code>. This client should
+be fully configurable and the ramifications of instantiating should not be the
+service&#39;s concern. We could configure our service to run with a Redis like so:</p>
+
+<p>(for this we assume that both <code>redis</code> and <code>memcache</code> are set in your
+<code>/etc/hosts</code> to point to the respective IPs. That&#39;d be <code>127.0.0.1</code> in most
+cases. But <code>redis</code> and <code>memcache</code> read nicer :)</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="c1"># conf/service_redis.yaml</span>
+<span class="l-Scalar-Plain">interfaces</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">Service</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">service:Service</span>
+
+        <span class="l-Scalar-Plain">cache_client</span><span class="p-Indicator">:</span>
+            <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">redis.client:StrictRedis</span>
+            <span class="l-Scalar-Plain">host</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">redis</span>
+            <span class="l-Scalar-Plain">port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">6379</span>
+            <span class="l-Scalar-Plain">db</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">1</span>
+</code></pre></div>
+<p>As you can see the config contains all information we need to instantiate the
+Redis client&#39;s class. Let&#39;s make use of the config API then and configure
+our service in the <code>apply_config(self, config)</code> hook:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># service/service.py</span>
+<span class="kn">import</span> <span class="nn">lymph</span> 
+
+
+<span class="k">class</span> <span class="nc">Service</span><span class="p">(</span><span class="n">lymph</span><span class="o">.</span><span class="n">Interface</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">apply_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Service</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">apply_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_client</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get_instance</span><span class="p">(</span><span class="s">&#39;cache_client&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>As you see it takes only one line to configure the service. Running it is a matter
+of pointing to the desired config file:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph instance --config<span class="o">=</span>conf/service_redis.yml
+</code></pre></div>
+<p>We could have other instances running on top of Memcache though. Like so:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">interfaces</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">Service</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">service:Service</span>
+
+        <span class="l-Scalar-Plain">cache_client</span><span class="p-Indicator">:</span>
+            <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">pymemcache.client:Client</span>
+            <span class="l-Scalar-Plain">server</span><span class="p-Indicator">:</span>
+              <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">memcache</span>
+              <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">11211</span>
+</code></pre></div>
+<p>Again, you run it by pointing it to the desired config file:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">» lymph instance --config<span class="o">=</span>conf/service_memcache.yml
+</code></pre></div>
+<p>You can also share instance of such classes over instances of your services.
+All service instances <a href="https://github.com/deliveryhero/lymph/blob/master/conf/sample-node.yml#L9">share the same ZooKeeper client
+instance</a>
+by default. Or you read from <a href="http://lymph.readthedocs.org/en/latest/configuration.html#environment-variables">environment
+variables</a>.</p>
+
+<h4>Up and down</h4>
+
+<p>You may want to set the stage when bringing up your service. Performing
+clean-up tasks when shutting down is just as likely. Therefore you may override
+the <code>on_start(self)</code> and <code>on_stop(self)</code> hooks.  For the <code>Service</code> from the
+previous section we could do:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python">    <span class="k">def</span> <span class="nf">on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Service</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">on_start</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;started with client: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_client</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;stopping...&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Service</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">on_stop</span><span class="p">()</span>
+</code></pre></div>
+<h4>Futures</h4>
+
+<p>Classic RPC calls block until the response is received. A deferred RPC call
+mechanism is implemented in case you wish to consume the RPC response later, or
+simply ignore it. Lymph&#39;s RPC implementation allows to defer calls:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">proxy</span><span class="p">(</span><span class="s">&#39;Greeting&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">greet</span><span class="o">.</span><span class="n">defer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">u&#39;John&#39;</span><span class="p">)</span>  <span class="c"># non-blocking</span>
+</code></pre></div>
+<h4>Metrics</h4>
+
+<p>Standard process metrics are being collected out of the box and exposed via an
+internal API. It is possible to collect and expose custom metrics.</p>
+
+<h4>Plugins</h4>
+
+<p>Lymph has a plugin system which allows you to register code for certain hooks,
+e.g. <code>on_error</code>, <code>on_http_request</code>, <code>on_interface_installation</code> etc. A <a href="https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/newrelic.py">New
+Relic</a>
+and a
+<a href="https://github.com/deliveryhero/lymph/blob/master/lymph/plugins/sentry.py">Sentry</a>
+plugin are shipped as built-ins. You can also register your own hooks.</p>
+
+<h4>CLI extensions</h4>
+
+<p>Lastly, CLIs are pluggable as well. Have a look at <a href="https://github.com/mouadino/lymph-top"><code>lymph
+top</code></a> as an example.</p>
+
+<h3>Under the hood</h3>
+
+<p>How does lymph do things under the hood? It isn&#39;t black magic. This section
+actually turned out to be much shorter than expected.</p>
+
+<p>Lymph depends on Zookeeper for service registry. Zookeeper is a distributed
+key-value store. Once a service instance is being started it registers itself
+with ZooKeeper providing its address and name.  Once it&#39;s being stopped it
+unregisters itself. When you send a request to another service, lymph gets all
+instances&#39; addresses and routes the request. That means, lymph does client-side
+load balancing. Request
+<a href="https://github.com/deliveryhero/lymph/blob/master/lymph/core/rpc.py#L140-155">round-robin</a>
+over the instances of a service. The request itself is being serialized with
+<a href="http://msgpack.org/">MessagePack</a> and send over the wire using
+<a href="http://zeromq.org/">ZeroMQ</a>.</p>
+
+<p>Lymph&#39;s pub-sub event system is powered by
+<a href="https://www.rabbitmq.com/">RabbitMQ</a>.  That means any valid topic exchange
+routing key is valid lymph event type. Lymph also allows to broadcast and delay
+events.</p>
+
+<p>Every service instance is a single Python process which handles requests and
+events via of greenlets. Lymph uses <a href="http://www.gevent.org/">gevent</a> for this.</p>
+
+<p>Lymph uses <a href="http://werkzeug.pocoo.org/">Werkzeug</a> to handle everything WSGI and
+HTTP.</p>
+
+<h3>Related frameworks and tech</h3>
+
+<p>Right now it seems as if both <a href="https://nameko.readthedocs.org/">Nameko</a> and
+lymph are the only Python service frameworks that exist. This is true for the
+level of integration and self-contained tooling at least. Obviously, they are
+different frameworks by different authors having been implemented
+independently. Nonetheless, they do share some striking characteristics. To us,
+these similarities validate our assumptions. It is worth mentioning that Nameko
+doesn&#39;t do service registry explicitly though. Nameko achieves this by using
+RabbitMQ for both events and RPC. It&#39;d be tedious to compare them both in
+detail but it is highly recommended to have a look at Nameko as well.</p>
+
+<p>Most other similar technologies aren&#39;t either Python-specific or provide
+specific solutions for RPC for instance like <a href="http://www.zerorpc.io/">ZeroRPC</a>.</p>
+
+<p>Things that are worth mentioning though are
+<a href="https://cocaine.readthedocs.org/en/latest/">cocaine</a>,
+<a href="http://www.spread.org/index.html">spread</a>,
+<a href="http://circuitsframework.com/">circuits</a>, ...</p>
+
+<h3>Future</h3>
+
+<p>We intend to grow the little ecosystem around lymph. While lymph will stay the
+core framework, we&#39;re already in the process of developing complementary
+libraries for writing special-purpose services, e.g. for storage and business
+process. Naturally, we&#39;ll open-source them once they have matured well enough.</p>
+
+<p>Lastly, we&#39;d like to mention
+<a href="https://github.com/deliveryhero/distconfig">distconfig</a> which is a Python
+library for managing shared state, i.e. configuration, feature switches etc.
+Distconfig is intended to complement lymph.</p>
+
+<h3>Outroduction</h3>
+
+<p>Thank you very much for your attention! We&#39;re done. We hope you enjoyed this
+little introduction. If you feel that the ice is broken we&#39;d consider ourselves
+successful. If you should have questions feel free to reach out in our IRC
+channel <code>#lymph</code> on <em>freenode.net</em>. Naturally, we&#39;d appreciate PRs and issues
+on GitHub.</p>
+
+<p>If you should spot any unclarity or errata within this article, you&#39;re
+very welcome to point them out at
+github.com/mamachanko/import-lymph](http://github.com/mamachanko/import-lymph).</p>
+
+    ---
+    <p>Hosted with GitHub Pages. Maintained by <a href="https://mamachanko.github.com">mamachanko</a>.</p>
+  </div>
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-64656787-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+</body>
+</html>
