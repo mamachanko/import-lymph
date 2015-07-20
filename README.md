@@ -18,17 +18,17 @@ cluster, service by service. It is very much hands-on and example-driven. Worry
 not, we have prepared a playground in a vagrant box.
 
 The vagrant box provisions with all tooling and code ready for your perusal. It
-has both [Zookeeper](http://zookeeper.apache.org/)(for service discovery) and
+has both [ZooKeeper](http://zookeeper.apache.org/)(for service discovery) and
 [RabbitMQ](https://www.rabbitmq.com/)(as an event system) running inside.
 Services and lymph's tooling can be explored within pre-configured tmux
 sessions.
 
-The only prerequisits are
+The only prerequisites are
 [vagrant](http://docs.vagrantup.com/v2/installation/index.html) and
 [ansible](http://docs.ansible.com/intro_installation.html) on your host
 machine.
 
-Getting your hand's firty is a matter of:
+Getting your hand's dirty is a matter of:
 
 ```bash
 git clone git@github.com:mamachanko/import-lymph.git
@@ -70,7 +70,7 @@ simple:
 * pay online
 * wait for delivery
 
-Basically, it's e-commerce with very grumpy customers and an emphasis on fast
+Basically, it's E-commerce with very grumpy customers and an emphasis on fast
 fulfillment.
 
 How's this introduction structured? Let's briefly go over the topics:
@@ -105,7 +105,7 @@ We wanted services because our big Django monolith hurt a lot. We weren't
 moving fast at all.  We've had trouble finding rhythm for a growing number of
 teams and developers. Teams were blocked by other teams. The code base was a
 big bowl of legacy spaghetti. We've had issues scaling. Basically, what comes
-to mind is the textbook situation: "my monolith hurts, i want services". The
+to mind is the textbook situation: "my monolith hurts, I want services". The
 idea of a service-oriented architecture became increasingly reasonable and
 attractive to us.
 
@@ -133,10 +133,10 @@ nothing that fit our needs. We wanted some very specific things:
 To sum things up, we wanted as little in the way as possible between
 developers and functionality they want to serve.
 
-You might say _"hey, use [nameko](https://nameko.readthedocs.org)"_. But nameko
+You might say _"hey, use [nameko](https://nameko.readthedocs.org)"_. But Nameko
 has not come to our attention until few months ago. Neither was it mature
 enough to be adopted way back then. Later though, we're going to talk
-technologies similar to nameko and lymph.
+technologies similar to Nameko and lymph.
 
 Taking all these things into consideration, rolling our own thing was very
 reasonable. And to not suspend any further, say hello to
@@ -238,8 +238,8 @@ Greeting [1]
 
 As you can see, one instance is running indeed (`Greeting [1]`). But what did
 just happen? When the service started in the right-hand panel it registered
-itself with Zookeeper by providing its name and address. When we ran the
-dicovery command found that entry. If we stopped the service, it'd unregister
+itself with ZooKeeper by providing its name and address. When we ran the
+discovery command found that entry. If we stopped the service, it'd unregister
 itself and the discovery command would say that no instances are running.
 
 Let's pretend we don't know what the greeting service has to offer. We'd like
@@ -263,7 +263,7 @@ rpc lymph.status()
 ```
 
 We see that the interface of the greeting service is composed of inherited
-methods(from `lymph.Interface`) and our `greet` method. Let's excercise the
+methods(from `lymph.Interface`) and our `greet` method. Let's exercise the
 `greet` method. We'll use lymph's `request` command. Therefore, we have to
 provide the service name, the name of the method and the body of the request as
 valid JSON. What we expect to see is the Greeting service to return a Greeting
@@ -278,9 +278,9 @@ The response to the RPC request is `'Hi, Flynne!'`. It's as expected and the
 service printed the name. But what exactly did just happen? When we issued the
 request lymph did the following:
 
-1. looked up the address of the greeting service instance in Zookeeper
+1. it looked up the address of the greeting service instance in ZooKeeper
 1. serialized the request body with MessagePack
-1. sent it over the wire via zeromq
+1. sent it over the wire via ZeroMQ
 1. the service received the request
 1. the service deserialized the request using MessagePack
 1. the service performed the heavy computation to produce the desired greeting for Flynne
@@ -291,7 +291,7 @@ request lymph did the following:
 Whoi! That's a lot. This is where lymph lives up to this introduction's claim.
 This is all the glue that lymph is.
 
-Here's a visualisation of what happened. The purple clipboard is synonomous
+Here's a visualisation of what happened. The purple clipboard is synonymous
 with ZooKeeper as the service registry and the Greeting service instance is
 the red speech bubble:
 <img alt="greeting" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting.png" width="100%">
@@ -306,7 +306,7 @@ service](https://github.com/mamachanko/import-lymph/blob/master/services/listen.
 listens to greeting's events. Again, it's a lymph service(we inherit from
 `lymph.Interface`). However, there's nothing but one method which consumes
 `greeted` events. It simply prints the greeted name contained in the event's
-body. Everytime an event of this type occurs exactly one instance of the listen
+body. Every time an event of this type occurs exactly one instance of the listen
 service will consume it.
 
 ```python
@@ -324,7 +324,7 @@ The [listen service's
 configuration](https://github.com/mamachanko/import-lymph/blob/master/conf/listen.yml)
 is no different from the one before.
 
-Let's excercise our services combination. This time round, though, we'll run
+Let's exercise our services combination. This time round, though, we'll run
 two instances of the greeting service and one instance of the listen service:
 
 ```bash
@@ -370,11 +370,11 @@ Keep in mind that if another service would've subscribed to this event as well,
 one instance of it would've also consumed the event. Yet, only one instance of
 each subscribed service. That's the pub-sub communication pattern. Also, we
 could emit any random event and our shell client would return, e.g. `lymph emit
-hi '{}'`. Publishers don't know about subcribers or if they exist at all.
+hi '{}'`. Publishers don't know about subscribers or if they exist at all.
 
 Returning to our example, when we do RPC requests we expect the greeting
 instances to respond in round-robin fashion while the listen instance should
-rect to all occuring events.
+react to all occurring events.
 
 ```bash
 » lymph request Greeting.greet '{"name": "Flynne"}'
@@ -386,7 +386,7 @@ As you see, our expectations are met. Lymph takes care of picking one of the
 instances from Zookeeper. That's client-side load-balancing.
 
 Here's a visualisation of the services' interaction. Again, ZooKeeper is
-synonomous with the purple clipboard, the Greeting service instances are the
+synonymous with the purple clipboard, the Greeting service instances are the
 red speech bubbles and the Listen service instance is the green headset:
 
 <img alt="greeting-listen" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/greeting-listen.png" width="100%">
@@ -407,7 +407,7 @@ we're not exposing RPC methods, emitting not listening to events. However, we
 configure a Werkzeug URL map as a class attribute. We've added one endpoint and
 a handler for it: `/greet`. The handler receives a Werkzeug request object.
 
-Webservices are very powerful as they expose our services' capabilities to the
+Web services are very powerful as they expose our services' capabilities to the
 world in the internet's language: HTTP.
 
 ```python
@@ -465,7 +465,7 @@ Listen [1]
 
 Let's hit our web service and see how the request penetrates our service
 landscape. We should see all service print something. The web service is
-listening at the default port 4080. We're using `httpie` to excercise the
+listening at the default port 4080. We're using `httpie` to exercise the
 request:
 
 ```
@@ -570,14 +570,14 @@ symbols should be self-explanatory:
 <img alt="node" align="center" src="https://rawgit.com/mamachanko/import-lymph/master/images/node.png" width="100%">
 
 Within the `tail` pane though, there's a lot going on. You would find an even
-bigger mess the more services and instances you run and the more intricated
+bigger mess the more services and instances you run and the more intricate
 your patterns of communication become. Sometimes you wonder "where did my
 request go?". Lymph helps you though with `trace_id`s. Every request that
 appears in our cluster which doesn't have a _trace id_ assigned yet gets one.
-Trace ids get fowarded with every RPC and event.
+Trace ids are forwarded with every RPC and event.
 
-We are able to corellate all log statements in our cluster to that one HTTP
-request. In fact the web service returns the the trace id in the `X-Trace-Id`
+We are able to correlate all log statements in our cluster to that one HTTP
+request. In fact the web service returns the trace id in the `X-Trace-Id`
 header. If you check the logs within the tail pane you should see that all logs
 can be correlated with that trace id. And indeed we see the same `trace_id`
 across our service instances for every incoming request. Here are the logs:
@@ -594,7 +594,7 @@ We've covered most of the available tooling. You should have a pretty good idea
 how to interact with your services now.
 
 There's one command we haven't tried yet. That's `lymph subscribe`. It is being
-left to the reader as an excercise.
+left to the reader as an exercise.
 
 ### More built-in features
 
@@ -615,17 +615,17 @@ PYTHONPATH=services nosetests --with-lymph
 Earlier, we have mentioned that ease of configuration was a concern for lymph.
 There's an API to deal configuration files. Its thin abstraction over the
 actual YAML files but gives you the freedom to instantiate classes right from
-the config. This gives you the freedom to configure services with a minial
+the config. This gives you the freedom to configure services with a minimal
 amount of code. Custom configuration can be processed by overriding lymph
 interface's `apply_config(self, config)` hook.
 
 Let's say your `Service` is supposed have a `cache_client`. This client should
 be fully configurable and the ramifications of instantiating should not be the
-service's concern. We could configure our service to run with a redis like so:
+service's concern. We could configure our service to run with a Redis like so:
 
 (for this we assume that both `redis` and `memcache` are set in your
-`/etc/hosts` to point to the respective IPs. that'd be `127.0.0.1` in most
-cases. but `redis` and `memcache` read nicer.)
+`/etc/hosts` to point to the respective IPs. That'd be `127.0.0.1` in most
+cases. But `redis` and `memcache` read nicer :)
 
 ```yaml
 # conf/service_redis.yaml
@@ -641,7 +641,7 @@ interfaces:
 ```
 
 As you can see the config contains all information we need to instantiate the
-redis client's class. Let's make use of the config API then and configure
+Redis client's class. Let's make use of the config API then and configure
 our service in the `apply_config(self, config)` hook:
 
 ```python
@@ -663,7 +663,7 @@ of pointing to the desired config file:
 » lymph instance --config=conf/service_redis.yml
 ```
 
-We could have other instances running on top of memcache though. Like so:
+We could have other instances running on top of Memcache though. Like so:
 
 ```yaml
 interfaces:
@@ -684,7 +684,7 @@ Again, you run it by pointing it to the desired config file:
 ```
 
 You can also share instance of such classes over instances of your services.
-All service instances [share the same zookeeper client
+All service instances [share the same ZooKeeper client
 instance](https://github.com/deliveryhero/lymph/blob/master/conf/sample-node.yml#L9)
 by default. Or you read from [environment
 variables](http://lymph.readthedocs.org/en/latest/configuration.html#environment-variables).
@@ -742,7 +742,7 @@ actually turned out to be much shorter than expected.
 
 Lymph depends on Zookeeper for service registry. Zookeeper is a distributed
 key-value store. Once a service instance is being started it registers itself
-with Zookeper providing its address and name.  Once it's being stopped it
+with ZooKeeper providing its address and name.  Once it's being stopped it
 unregisters itself. When you send a request to another service, lymph gets all
 instances' addresses and routes the request. That means, lymph does client-side
 load balancing. Request
@@ -759,23 +759,23 @@ events.
 Every service instance is a single Python process which handles requests and
 events via of greenlets. Lymph uses [gevent](http://www.gevent.org/) for this.
 
-Lymph uses [werkzeug](http://werkzeug.pocoo.org/) to handle everything WSGI and
+Lymph uses [Werkzeug](http://werkzeug.pocoo.org/) to handle everything WSGI and
 HTTP.
 
 ### Related frameworks and tech
 
-Right now it seems as if both [nameko](https://nameko.readthedocs.org/) and
+Right now it seems as if both [Nameko](https://nameko.readthedocs.org/) and
 lymph are the only Python service frameworks that exist. This is true for the
 level of integration and self-contained tooling at least. Obviously, they are
 different frameworks by different authors having been implemented
-independently. Nonetheless, they do share some striking characteritics. To us,
-these similarities validate our assumptions. It is worth mentioning that nameko
+independently. Nonetheless, they do share some striking characteristics. To us,
+these similarities validate our assumptions. It is worth mentioning that Nameko
 doesn't do service registry explicitly though. Nameko achieves this by using
 RabbitMQ for both events and RPC. It'd be tedious to compare them both in
-detail but it is highly recommended to have a look at nameko as well.
+detail but it is highly recommended to have a look at Nameko as well.
 
 Most other similar technologies aren't either Python-specific or provide
-specific solutions for RPC for instance like [zerorpc](http://www.zerorpc.io/).
+specific solutions for RPC for instance like [ZeroRPC](http://www.zerorpc.io/).
 
 Things that are worth mentioning though are
 [cocaine](https://cocaine.readthedocs.org/en/latest/),
@@ -802,6 +802,6 @@ successful. If you should have questions feel free to reach out in our IRC
 channel `#lymph` on _freenode.net_. Naturally, we'd appreciate PRs and issues
 on GitHub.
 
-If you should spot any unclarities or errata within this introduction, you're
+If you should spot any unclarity or errata within this article, you're
 very welcome to point them out at
-[github.com/mamachanko/import-lymph](http://github.com/mamachanko/import-lymph).
+github.com/mamachanko/import-lymph](http://github.com/mamachanko/import-lymph).
